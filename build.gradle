@@ -1,0 +1,36 @@
+import io.senx.warpfleet.*
+
+buildscript {
+  repositories {
+    mavenCentral()
+  }
+  dependencies {
+  }
+}
+apply plugin: 'groovy'
+
+if (project.hasProperty("args")) {
+  ext.cmdargs = project.getProperty("args")
+} else {
+  ext.cmdargs = "ls"
+}
+
+task getGroups(type : GetGroups) {
+}
+
+task getArtifacts(type : GetArtifacts) {
+  wfGroup = project.hasProperty('group')? project.group: ''
+}
+
+task getVersions(type : GetVersions) {
+  wfGroup = project.hasProperty('group')? project.group: ''
+  wfArtifact = project.hasProperty('artifact')? project.artifact: ''
+}
+
+task getArtifactInfo(type : GetArtifactInfo) {
+  wfGroup = project.hasProperty('group')? project.group: ''
+  wfArtifact = project.hasProperty('artifact')? project.artifact: ''
+  wfVersion = project.hasProperty('version')? project.version: 'latest'
+}
+
+
