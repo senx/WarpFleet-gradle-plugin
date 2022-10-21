@@ -1,31 +1,35 @@
+/*
+ *   Copyright 2022  SenX S.A.S.
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
+
 package io.senx.warpfleet;
 
-import kong.unirest.Unirest;
+import io.senx.warpfleet.utils.Constants;
+import io.senx.warpfleet.utils.Helper;
 import kong.unirest.json.JSONObject;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.tasks.Input;
-import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.TaskAction;
+import org.gradle.api.tasks.options.Option;
 
 /**
  * The type Get artifact info.
  */
 @SuppressWarnings("unused")
 public class GetArtifactInfo extends DefaultTask {
-  /**
-   * The Description.
-   */
-  @Internal
-  String description;
-  /**
-   * The Group.
-   */
-  @Internal
-  String group;
-  /**
-   * The wfGroup.
-   */
   @Input
   String wfGroup;
   /**
@@ -40,14 +44,9 @@ public class GetArtifactInfo extends DefaultTask {
   @Optional
   String wfVersion;
 
-  @Override
-  public String getGroup() {
-    return "WarpFleet";
-  }
-
-  @Override
-  public String getDescription() {
-    return "Get list of available artifact's versions";
+  public GetArtifactInfo() {
+    this.setDescription("Get Artifact info");
+    this.setGroup(Constants.GROUP);
   }
 
   /**
@@ -55,25 +54,15 @@ public class GetArtifactInfo extends DefaultTask {
    */
   @TaskAction
   public void getArtifactInfo() {
-    if (null == this.wfVersion || "latest".equals(this.wfVersion)) {
-      this.wfVersion = Unirest.get("https://warpfleet.senx.io/api/{group}/{artifact}")
-          .routeParam("group", this.wfGroup)
-          .routeParam("artifact", this.wfArtifact)
-          .header("accept", "application/json")
-          .asJson()
-          .getBody()
-          .getObject()
-          .getJSONObject("latest").getString("version");
+    if (null == this.wfVersion || "unspecified".equals(this.wfVersion) || "latest".equals(this.wfVersion)) {
+      this.wfVersion = Helper.getLatest(this.wfGroup, this.wfArtifact).getJSONObject("latest").getString("version");
     }
-    JSONObject info = Unirest.get("https://warpfleet.senx.io/api/{group}/{artifact}/{version}")
-        .routeParam("group", this.wfGroup)
-        .routeParam("artifact", this.wfArtifact)
-        .routeParam("version", this.wfVersion)
-        .header("accept", "application/json")
-        .asJson()
-        .getBody()
-        .getObject();
-    System.out.printf("- Name: %s", info);
+    JSONObject info = Helper.getArtifactInfo(this.wfGroup, this.wfArtifact, this.wfVersion);
+    System.out.printf("- %s:%s:%s (%s)\n",
+        info.getString("group"),
+        info.getString("artifact"),
+        info.getString("version"),
+        info.getString("description"));
   }
 
   /**
@@ -90,6 +79,7 @@ public class GetArtifactInfo extends DefaultTask {
    *
    * @param wfGroup the wfGroup
    */
+  @Option(option = "group", description = "Artifact's group, ie: io.warp10")
   public void setWfGroup(String wfGroup) {
     this.wfGroup = wfGroup;
   }
@@ -108,6 +98,7 @@ public class GetArtifactInfo extends DefaultTask {
    *
    * @param wfArtifact the wf artifact
    */
+  @Option(option = "artifact", description = "Artifact's name, ie: warp10-plugin-mqtt")
   public void setWfArtifact(String wfArtifact) {
     this.wfArtifact = wfArtifact;
   }
@@ -126,6 +117,7 @@ public class GetArtifactInfo extends DefaultTask {
    *
    * @param wfVersion the wf version
    */
+  @Option(option = "version", description = "Artifact's version, ie: 0.0.3")
   public void setWfVersion(String wfVersion) {
     this.wfVersion = wfVersion;
   }
