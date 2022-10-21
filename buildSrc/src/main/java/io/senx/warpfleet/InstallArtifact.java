@@ -108,6 +108,11 @@ public class InstallArtifact extends DefaultTask {
           PackageInfo packageInfo = new PackageInfo();
           packageInfo.setGroup(parts[0]);
           packageInfo.setName(parts[1]);
+
+          if (parts.length  == 2) {
+            String version = Helper.getLatest(parts[0], parts[1]).getJSONObject("latest").getString("version");
+            packageInfo.setVersion(version);
+          }
           if (parts.length > 2) {
             String version = parts[2];
             if (StringUtils.isBlank(version) || "latest".equals(version)) {
