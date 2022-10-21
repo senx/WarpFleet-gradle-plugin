@@ -14,7 +14,7 @@
  *   limitations under the License.
  */
 
-package io.senx.warpfleet.utils;
+package io.warp10.warpfleet.utils;
 
 import org.apache.commons.lang3.StringUtils;
 

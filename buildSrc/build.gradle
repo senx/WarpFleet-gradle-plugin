@@ -28,12 +28,13 @@ gradlePlugin {
   plugins {
     WFPlugin {
       id = 'io.warp10.warpfleet-gradle-plugin'
-      implementationClass = 'io.senx.warpfleet.WFPlugin'
+      displayName = 'WarpFleet Gradle Plugin'
+      implementationClass = 'io.warp10.warpfleet.WFPlugin'
     }
   }
 }
 
-/*
+
 publishing {
   publications {
     maven(MavenPublication) {
@@ -45,4 +46,4 @@ publishing {
     }
   }
 }
-*/
+

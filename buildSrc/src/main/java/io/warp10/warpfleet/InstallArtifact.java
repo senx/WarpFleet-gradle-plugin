@@ -14,11 +14,11 @@
  *   limitations under the License.
  */
 
-package io.senx.warpfleet;
+package io.warp10.warpfleet;
 
-import io.senx.warpfleet.utils.Constants;
-import io.senx.warpfleet.utils.Helper;
-import io.senx.warpfleet.utils.PackageInfo;
+import io.warp10.warpfleet.utils.Constants;
+import io.warp10.warpfleet.utils.Helper;
+import io.warp10.warpfleet.utils.PackageInfo;
 import kong.unirest.Unirest;
 import kong.unirest.json.JSONArray;
 import kong.unirest.json.JSONObject;
@@ -324,7 +324,7 @@ public class InstallArtifact extends DefaultTask {
    *
    * @param wfVersion the wf version
    */
-  @Option(option = "version", description = "Artifact's version, ie: 0.0.3")
+  @Option(option = "vers", description = "Artifact's version, ie: 0.0.3")
   public void setWfVersion(String wfVersion) {
     this.wfVersion = wfVersion;
   }

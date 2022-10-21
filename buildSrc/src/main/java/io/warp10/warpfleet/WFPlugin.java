@@ -14,7 +14,7 @@
  *   limitations under the License.
  */
 
-package io.senx.warpfleet;
+package io.warp10.warpfleet;
 
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;

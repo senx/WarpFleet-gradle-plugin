@@ -14,10 +14,10 @@
  *   limitations under the License.
  */
 
-package io.senx.warpfleet;
+package io.warp10.warpfleet;
 
-import io.senx.warpfleet.utils.Constants;
-import io.senx.warpfleet.utils.Helper;
+import io.warp10.warpfleet.utils.Constants;
+import io.warp10.warpfleet.utils.Helper;
 import kong.unirest.json.JSONObject;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.tasks.TaskAction;

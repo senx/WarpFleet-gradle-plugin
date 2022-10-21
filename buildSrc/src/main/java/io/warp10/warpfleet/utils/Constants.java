@@ -14,7 +14,7 @@
  *   limitations under the License.
  */
 
-package io.senx.warpfleet.utils;
+package io.warp10.warpfleet.utils;
 
 public class Constants {
   public static String GROUP = "WarpFleet";
