@@ -30,7 +30,7 @@ pipeline {
     stage('Checkout') {
       steps {
         this.notifyBuild('STARTED', version)
-        git poll: false, url: 'git@gitlab.com:senx/WarpFleet-gradle-plugin.git'
+        git poll: false, branch: 'main', url: 'git@gitlab.com:senx/WarpFleet-gradle-plugin.git'
         sh 'git checkout main'
         sh 'git fetch --tags'
         sh 'git pull origin main'
