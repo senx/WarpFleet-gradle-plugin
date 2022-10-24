@@ -46,7 +46,7 @@ pipeline {
     stage('Package') {
       steps {
         sh '(cd buildSrc && ./gradlew jar $GRADLE_ARGS)'
-        archiveArtifacts "build/libs/*.jar"
+        archiveArtifacts "buildSrc/build/libs/*.jar"
       }
     }
 
