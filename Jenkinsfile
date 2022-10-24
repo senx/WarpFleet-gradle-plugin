@@ -39,7 +39,7 @@ pipeline {
 
     stage('Build') {
       steps {
-        sh '(cd ./buildSrc && ./buildSrc/gradlew clean build $GRADLE_ARGS)'
+        sh '(cd ./buildSrc && ./gradlew clean build $GRADLE_ARGS)'
       }
     }
 
