@@ -39,13 +39,13 @@ pipeline {
 
     stage('Build') {
       steps {
-        sh '(cd buildSrc && ./buildSrc/gradlew clean build $GRADLE_ARGS)'
+        sh '(cd ./buildSrc && ./buildSrc/gradlew clean build $GRADLE_ARGS)'
       }
     }
 
     stage('Package') {
       steps {
-        sh '(cd buildSrc && ./gradlew jar $GRADLE_ARGS)'
+        sh '(cd ./buildSrc && ./gradlew jar $GRADLE_ARGS)'
         archiveArtifacts "buildSrc/build/libs/*.jar"
       }
     }
@@ -58,7 +58,7 @@ pipeline {
         message "Should we deploy libs?"
       }
       steps {
-        sh '(cd buildSrc && ./gradlew $GRADLE_ARGS clean jar sourcesJar javadocJar publishMavenPublicationToNexusRepository -x test)'
+        sh '(cd ./buildSrc && ./gradlew $GRADLE_ARGS clean jar sourcesJar javadocJar publishMavenPublicationToNexusRepository -x test)'
       }
     }
 
@@ -75,9 +75,9 @@ pipeline {
             message 'Should we deploy to Maven Central?'
           }
           steps {
-            sh '(cd buildSrc && ./gradlew clean jar sourcesJar javadocJar publishMavenPublicationToMavenRepository -x test -x shadowJar $GRADLE_ARGS)'
-            sh '(cd buildSrc && ./gradlew closeRepository $GRADLE_ARGS)'
-            sh '(cd buildSrc && ./gradlew releaseRepository $GRADLE_ARGS)'
+            sh '(cd ./buildSrc && ./gradlew clean jar sourcesJar javadocJar publishMavenPublicationToMavenRepository -x test -x shadowJar $GRADLE_ARGS)'
+            sh '(cd ./buildSrc && ./gradlew closeRepository $GRADLE_ARGS)'
+            sh '(cd ./buildSrc && ./gradlew releaseRepository $GRADLE_ARGS)'
             this.notifyBuild('PUBLISHED', version)
           }
         }
