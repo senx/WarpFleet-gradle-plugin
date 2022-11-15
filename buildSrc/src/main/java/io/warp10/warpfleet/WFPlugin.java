@@ -23,10 +23,10 @@ import org.gradle.api.Project;
 public class WFPlugin implements Plugin<Project> {
 
   public void apply(Project project) {
-    project.getTasks().register("getArtifactInfo", GetArtifactInfo.class);
-    project.getTasks().register("getArtifacts", GetArtifacts.class);
-    project.getTasks().register("getGroups", GetGroups.class);
-    project.getTasks().register("getVersions", GetVersions.class);
-    project.getTasks().register("installArtifact", InstallArtifact.class);
+    project.getTasks().register("wgGetArtifactInfo", GetArtifactInfo.class);
+    project.getTasks().register("wfGetArtifacts", GetArtifacts.class);
+    project.getTasks().register("wfGetGroups", GetGroups.class);
+    project.getTasks().register("wfGetVersions", GetVersions.class);
+    project.getTasks().register("wfInstall", InstallArtifact.class);
   }
 }
