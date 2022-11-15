@@ -14,6 +14,7 @@
  *   limitations under the License.
  */
 import hudson.model.*
+@Library('senx-shared-library') _
 
 pipeline {
   agent any
@@ -23,29 +24,45 @@ pipeline {
   }
 
   environment {
-    GRADLE_ARGS = "-Psigning.gnupg.keyName=${getParam('gpgKeyName')} -PossrhUsername=${getParam('ossrhUsername')} -PossrhPassword=${getParam('ossrhPassword')} -PnexusHost=${getParam('nexusHost')}  -PnexusUsername=${getParam('nexusUsername')} -PnexusPassword=${getParam('nexusPassword')}"
-    version = "${getVersion()}"
+    GPG_KEY_NAME = "${env.gpgKeyName}"
+    NEXUS_HOST = "${env.nexusHost}"
+    NEXUS_CREDS = credentials('nexus')
+    OSSRH_CREDS = credentials('ossrh')
+    GRADLE_CMD = './gradlew \
+                -Psigning.gnupg.keyName=$GPG_KEY_NAME \
+                -PossrhUsername=$OSSRH_CREDS_USR \
+                -PossrhPassword=$OSSRH_CREDS_PSW \
+                -PnexusHost=$NEXUS_HOST \
+                -PnexusUsername=$NEXUS_CREDS_USR \
+                -PnexusPassword=$NEXUS_CREDS_PSW'
   }
   stages {
     stage('Checkout') {
       steps {
-        this.notifyBuild('STARTED', version)
+        script {
+          env.version = ""
+          notify.slack('STARTED')
+        }
         git poll: false, branch: 'main', url: 'git@gitlab.com:senx/WarpFleet-gradle-plugin.git'
         sh 'git checkout main'
         sh 'git fetch --tags'
         sh 'git pull origin main'
+
+        script {
+          env.version = gitUtils.getVersion()
+        }
       }
     }
 
     stage('Build') {
       steps {
-        sh '(cd ./buildSrc && ./gradlew clean build $GRADLE_ARGS)'
+        sh "(cd ./buildSrc && ${GRADLE_CMD} .clean build)"
       }
     }
 
     stage('Package') {
       steps {
-        sh '(cd ./buildSrc && ./gradlew jar $GRADLE_ARGS)'
+        sh "(cd ./buildSrc && ${GRADLE_CMD} jar)"
         archiveArtifacts "buildSrc/build/libs/*.jar"
       }
     }
@@ -58,13 +75,13 @@ pipeline {
         message "Should we deploy libs?"
       }
       steps {
-        sh '(cd ./buildSrc && ./gradlew $GRADLE_ARGS clean jar sourcesJar javadocJar publishMavenPublicationToNexusRepository -x test)'
+        sh "(cd ./buildSrc && ${GRADLE_CMD} clean jar sourcesJar javadocJar publishMavenPublicationToNexusRepository -x test)"
       }
     }
 
     stage('Maven Publish') {
       when {
-        expression { return isItATagCommit() }
+        expression { gitUtils.isTag() }
       }
       parallel {
         stage('Deploy to Maven Central') {
@@ -75,10 +92,12 @@ pipeline {
             message 'Should we deploy to Maven Central?'
           }
           steps {
-            sh '(cd ./buildSrc && ./gradlew clean jar sourcesJar javadocJar publishMavenPublicationToMavenRepository -x test -x shadowJar $GRADLE_ARGS)'
-            sh '(cd ./buildSrc && ./gradlew closeRepository $GRADLE_ARGS)'
-            sh '(cd ./buildSrc && ./gradlew releaseRepository $GRADLE_ARGS)'
-            this.notifyBuild('PUBLISHED', version)
+            sh "(cd ./buildSrc && ${GRADLE_CMD} clean jar sourcesJar javadocJar publishMavenPublicationToMavenRepository -x test -x shadowJar)"
+            sh "(cd ./buildSrc && ${GRADLE_CMD} closeRepository)"
+            sh "(cd ./buildSrc && ${GRADLE_CMD} releaseRepository)"
+            script {
+              notify.slack('PUBLISHED')
+            }
           }
         }
       }
@@ -86,52 +105,26 @@ pipeline {
   }
   post {
     success {
-      this.notifyBuild('SUCCESSFUL', version)
+      script {
+        notify.slack('SUCCESSFUL')
+      }
     }
     failure {
-      this.notifyBuild('FAILURE', version)
+      script {
+        notify.slack('FAILURE')
+      }
     }
     aborted {
-      this.notifyBuild('ABORTED', version)
+      script {
+        notify.slack('ABORTED')
+      }
     }
     unstable {
-      this.notifyBuild('UNSTABLE', version)
+      script {
+        notify.slack('UNSTABLE')
+      }
     }
   }
-}
-
-void notifyBuild(String buildStatus, String version) {
-  // build status of null means successful
-  buildStatus = buildStatus ?: 'SUCCESSFUL'
-  String subject = "${buildStatus}: Job ${env.JOB_NAME} [${env.BUILD_DISPLAY_NAME}] | ${version}" as String
-  String summary = "${subject} (${env.BUILD_URL})" as String
-  // Override default values based on build status
-  if (buildStatus == 'STARTED') {
-    color = 'YELLOW'
-    colorCode = '#FFFF00'
-  } else if (buildStatus == 'SUCCESSFUL') {
-    color = 'GREEN'
-    colorCode = '#00FF00'
-  } else if (buildStatus == 'PUBLISHED') {
-    color = 'BLUE'
-    colorCode = '#0000FF'
-  } else {
-    color = 'RED'
-    colorCode = '#FF0000'
-  }
-
-  // Send notifications
-  this.notifySlack(colorCode, summary, buildStatus)
-}
-
-void notifySlack(String color, String message, String buildStatus) {
-  String slackURL = getParam('slackUrl')
-  String payload = "{\"username\": \"${env.JOB_NAME}\",\"attachments\":[{\"title\": \"${env.JOB_NAME} ${buildStatus}\",\"color\": \"${color}\",\"text\": \"${message}\"}]}" as String
-  sh "curl -X POST -H 'Content-type: application/json' --data '${payload}' ${slackURL}" as String
-}
-
-String getParam(String key) {
-  return params.get(key)
 }
 
 String getVersion() {
