@@ -56,7 +56,7 @@ pipeline {
 
     stage('Build') {
       steps {
-        sh "(cd ./buildSrc && ${GRADLE_CMD} .clean build)"
+        sh "(cd ./buildSrc && ${GRADLE_CMD} clean build)"
       }
     }
 
