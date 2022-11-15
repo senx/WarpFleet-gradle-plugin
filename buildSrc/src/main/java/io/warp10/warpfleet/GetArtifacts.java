@@ -19,10 +19,15 @@ package io.warp10.warpfleet;
 import io.warp10.warpfleet.utils.Constants;
 import io.warp10.warpfleet.utils.Helper;
 import kong.unirest.json.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.tasks.Input;
+import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.options.Option;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The type Get artifacts.
@@ -33,6 +38,7 @@ public class GetArtifacts extends DefaultTask {
    * The Wf group.
    */
   @Input
+  @Optional
   String wfGroup;
 
   public GetArtifacts() {
@@ -45,14 +51,23 @@ public class GetArtifacts extends DefaultTask {
    */
   @TaskAction
   public void getArtifacts() {
-    Helper.getArtifacts(this.wfGroup).forEach(item -> {
+    List<String> groups = new ArrayList<>();
+    if (StringUtils.isBlank(this.wfGroup)) {
+      Helper.getGroups().forEach(g -> groups.add(((JSONObject) g).getString("name")));
+    } else {
+      groups.add(this.wfGroup.trim());
+    }
+    groups.forEach(g -> Helper.getArtifacts(g).forEach(item -> {
       JSONObject repo = (JSONObject) item;
-      System.out.printf("- %s:%s:%s (%s)\n",
-          repo.getJSONObject("latest").getString("group"),
-          repo.getJSONObject("latest").getString("artifact"),
-          repo.getJSONObject("latest").getString("version"),
-          repo.getJSONObject("latest").getString("description"));
-    });
+      JSONObject latest = repo.optJSONObject("latest");
+      if (null != latest) {
+        System.out.printf("- %s:%s:%s (%s)\n",
+            latest.getString("group"),
+            latest.getString("artifact"),
+            latest.getString("version"),
+            latest.getString("description"));
+      }
+    }));
   }
 
   /**
