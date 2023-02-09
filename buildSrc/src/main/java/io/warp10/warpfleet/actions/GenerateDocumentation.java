@@ -102,7 +102,7 @@ public class GenerateDocumentation extends DefaultTask {
     ));
     fileList.forEach(f -> {
       try {
-        String macroWS = Files.readString(Path.of(f.getString("fileObj")), StandardCharsets.UTF_8);
+        String macroWS = Files.readString(Paths.get(f.getString("fileObj")), StandardCharsets.UTF_8);
         String macro = "@" + f.getString("file").replace(".mc2", "");
         String tpl;
         try {
