@@ -39,6 +39,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -155,7 +156,7 @@ public class GenerateDocumentation extends DefaultTask {
       Integer.MAX_VALUE,
       (filePath, fileAttr) -> fileAttr.isRegularFile() && filePath.toFile().getAbsolutePath().endsWith(".mc2")
     )) {
-      return stream.map(Path::toFile).toList();
+      return stream.map(Path::toFile).collect(Collectors.toList());
     }
   }
 

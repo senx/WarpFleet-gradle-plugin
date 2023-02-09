@@ -235,8 +235,7 @@ public class InstallArtifact extends DefaultTask {
         // Copy all jars into Warp 10 lib folder
         Logger.messageInfo("Installing dependencies:");
         List<File> jarList = Arrays.stream(Objects.requireNonNull(depsDir.listFiles()))
-          .filter(f -> f.getName().endsWith(".jar"))
-          .toList();
+          .filter(f -> f.getName().endsWith(".jar")).collect(Collectors.toList());
         for (File f : jarList) {
           FileUtils.copyFile(f, Helper.filePath(this.warp10Dir, "lib", f.getName()));
           Logger.messageSusccess("Dependency: " + f.getName() + " successfully deployed");
