@@ -5,7 +5,7 @@ plugins {
   id 'maven-publish'
   id 'java-gradle-plugin'
   id 'signing'
-  id 'net.nemerosa.versioning' version "3.0.0"
+  id 'net.nemerosa.versioning' version "2.15.1"
   id 'io.codearte.nexus-staging' version "0.30.0"
 }
 versioning {
