@@ -14,54 +14,63 @@
  *   limitations under the License.
  */
 
-package io.warp10.warpfleet;
+package io.warp10.warpfleet.actions;
 
 import io.warp10.warpfleet.utils.Constants;
 import io.warp10.warpfleet.utils.Helper;
 import kong.unirest.json.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.tasks.Input;
+import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.options.Option;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * The type Get versions.
+ * The type Get artifacts.
  */
 @SuppressWarnings("unused")
-public class GetVersions extends DefaultTask {
+public class GetArtifacts extends DefaultTask {
   /**
    * The Wf group.
    */
   @Input
+  @Optional
   String wfGroup;
-  /**
-   * The Wf artifact.
-   */
-  @Input
-  String wfArtifact;
 
-  public GetVersions() {
-    this.setDescription("Get list of available artifact's versions");
+  /**
+   * Instantiates a new Get artifacts.
+   */
+  public GetArtifacts() {
+    this.setDescription("Get list of available artifacts");
     this.setGroup(Constants.GROUP);
   }
 
   /**
-   * Gets versions.
+   * Gets artifacts.
    */
   @TaskAction
-  public void getVersions() {
-    JSONObject versions = Helper.getVersions(this.wfGroup, this.wfArtifact);
-    System.out.printf("- Name:            %s:%s\n",
-        versions.getJSONObject("latest").getString("group"),
-        versions.getJSONObject("latest").getString("artifact")
-    );
-    System.out.printf("- Description:     %s\n", versions.getJSONObject("latest").getString("description"));
-    System.out.printf("- Latest version:  %s\n", versions.getJSONObject("latest").getString("version"));
-    System.out.println("- Available:");
-    versions.getJSONArray("children").forEach(item -> {
+  public void getArtifacts() {
+    List<String> groups = new ArrayList<>();
+    if (StringUtils.isBlank(this.wfGroup)) {
+      Helper.getGroups().forEach(g -> groups.add(((JSONObject) g).getString("name")));
+    } else {
+      groups.add(this.wfGroup.trim());
+    }
+    groups.forEach(g -> Helper.getArtifacts(g).forEach(item -> {
       JSONObject repo = (JSONObject) item;
-      System.out.printf("    - %s\n", repo.getString("name"));
-    });
+      JSONObject latest = repo.optJSONObject("latest");
+      if (null != latest) {
+        System.out.printf("- %s:%s:%s (%s)\n",
+            latest.getString("group"),
+            latest.getString("artifact"),
+            latest.getString("version"),
+            latest.getString("description"));
+      }
+    }));
   }
 
   /**
@@ -81,24 +90,5 @@ public class GetVersions extends DefaultTask {
   @Option(option = "group", description = "Artifact's group, ie: io.warp10")
   public void setWfGroup(String wfGroup) {
     this.wfGroup = wfGroup;
-  }
-
-  /**
-   * Gets wf artifact.
-   *
-   * @return the wf artifact
-   */
-  public String getWfArtifact() {
-    return wfArtifact;
-  }
-
-  /**
-   * Sets wf artifact.
-   *
-   * @param wfArtifact the wf artifact
-   */
-  @Option(option = "artifact", description = "Artifact's name, ie: warp10-plugin-mqtt")
-  public void setWfArtifact(String wfArtifact) {
-    this.wfArtifact = wfArtifact;
   }
 }

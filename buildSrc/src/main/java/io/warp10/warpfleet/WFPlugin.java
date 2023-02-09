@@ -16,11 +16,26 @@
 
 package io.warp10.warpfleet;
 
+import io.warp10.warpfleet.actions.GenerateDocumentation;
+import io.warp10.warpfleet.actions.GetArtifactInfo;
+import io.warp10.warpfleet.actions.GetArtifacts;
+import io.warp10.warpfleet.actions.GetGroups;
+import io.warp10.warpfleet.actions.GetVersions;
+import io.warp10.warpfleet.actions.InstallArtifact;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 
+/**
+ * The type Wf plugin.
+ */
 @SuppressWarnings("unused")
 public class WFPlugin implements Plugin<Project> {
+  /**
+   * Instantiates a new Wf plugin.
+   */
+  public WFPlugin() {
+
+  }
 
   public void apply(Project project) {
     project.getTasks().register("wgGetArtifactInfo", GetArtifactInfo.class);
@@ -28,5 +43,6 @@ public class WFPlugin implements Plugin<Project> {
     project.getTasks().register("wfGetGroups", GetGroups.class);
     project.getTasks().register("wfGetVersions", GetVersions.class);
     project.getTasks().register("wfInstall", InstallArtifact.class);
+    project.getTasks().register("wfDoc", GenerateDocumentation.class);
   }
 }

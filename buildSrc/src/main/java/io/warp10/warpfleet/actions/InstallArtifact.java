@@ -14,10 +14,11 @@
  *   limitations under the License.
  */
 
-package io.warp10.warpfleet;
+package io.warp10.warpfleet.actions;
 
 import io.warp10.warpfleet.utils.Constants;
 import io.warp10.warpfleet.utils.Helper;
+import io.warp10.warpfleet.utils.Logger;
 import io.warp10.warpfleet.utils.PackageInfo;
 import kong.unirest.Unirest;
 import kong.unirest.json.JSONArray;
@@ -31,6 +32,7 @@ import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.options.Option;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -81,6 +83,12 @@ public class InstallArtifact extends DefaultTask {
    */
   @Input
   String warp10Dir;
+  /**
+   * The Wf repo url.
+   */
+  @Input
+  @Optional
+  String wfRepoURL;
 
   /**
    * Instantiates a new Install artifact.
@@ -102,14 +110,14 @@ public class InstallArtifact extends DefaultTask {
         packages = Arrays.stream(wfPackages.split(",")).map(p -> {
           String[] parts = p.split(":");
           if (parts.length < 2) {
-            Helper.messageError("Wrong syntax for :" + p);
+            Logger.messageError("Wrong syntax for :" + p);
             throw new RuntimeException("Bad syntax");
           }
           PackageInfo packageInfo = new PackageInfo();
           packageInfo.setGroup(parts[0]);
           packageInfo.setName(parts[1]);
 
-          if (parts.length  == 2) {
+          if (parts.length == 2) {
             String version = Helper.getLatest(parts[0], parts[1]).getJSONObject("latest").getString("version");
             packageInfo.setVersion(version);
           }
@@ -132,15 +140,15 @@ public class InstallArtifact extends DefaultTask {
           this.wfVersion = Helper.getLatest(this.wfGroup, this.wfArtifact).getJSONObject("latest").getString("version");
         }
         if (StringUtils.isBlank(this.wfGroup) || "unspecified".equals(this.wfGroup)) {
-          Helper.messageError("Artifact's group is mandatory");
+          Logger.messageError("Artifact's group is mandatory");
           return;
         }
         if (StringUtils.isBlank(this.wfArtifact) || "unspecified".equals(this.wfArtifact)) {
-          Helper.messageError("Artifact's name is mandatory");
+          Logger.messageError("Artifact's name is mandatory");
           return;
         }
         if (StringUtils.isBlank(this.warp10Dir) || "unspecified".equals(this.warp10Dir)) {
-          Helper.messageError("Warp 10 root directory is mandatory");
+          Logger.messageError("Warp 10 root directory is mandatory");
           return;
         }
         if (StringUtils.isBlank(this.wfClassifier) || "unspecified".equals(this.wfClassifier)) {
@@ -149,12 +157,20 @@ public class InstallArtifact extends DefaultTask {
         packages.add(new PackageInfo(this.wfGroup, this.wfArtifact, this.wfVersion, this.wfClassifier));
       }
       // process packages
-      for (PackageInfo pi: packages) {
-        Helper.messageInfo("Retrieving " + pi + " info");
+      for (PackageInfo pi : packages) {
+        Logger.messageInfo("Retrieving " + pi + " info");
         JSONObject info = Helper.getArtifactInfo(pi);
-        Helper.messageInfo("Installing " + pi + " into: " + this.warp10Dir);
-        // TODO get macro
+        Logger.messageInfo("Installing " + pi + " into: " + this.warp10Dir);
 
+        if (null != info.getJSONArray("macros")) {
+          info.getJSONArray("macros").forEach(m -> {
+            try {
+              Helper.getMacro(this.wfGroup, this.wfArtifact, this.wfVersion, (JSONObject) m, this.warp10Dir);
+            } catch (IOException e) {
+              throw new RuntimeException(e);
+            }
+          });
+        }
         JSONArray dependencies = info.optJSONArray("dependencies");
         if (null == dependencies) {
           dependencies = new JSONArray();
@@ -172,31 +188,35 @@ public class InstallArtifact extends DefaultTask {
         // Retrieve jar
         String jar = info.getString("jar");
         String fileName = pi.getGroup() + "-" + pi.getName() + "-" + pi.getVersion() + ".jar";
-        Helper.messageInfo("Retrieving: " + fileName);
+        Logger.messageInfo("Retrieving: " + fileName);
         Unirest.get(jar)
-            .asFile(Helper.path(depsDir.getAbsolutePath(), fileName))
-            .ifFailure(Helper::processHTTPError)
-            .getBody();
-        Helper.messageSusccess(fileName + " retrieved");
+          .asFile(Helper.path(depsDir.getAbsolutePath(), fileName))
+          .ifFailure(Helper::processHTTPError)
+          .getBody();
+        Logger.messageSusccess(fileName + " retrieved");
 
         // Building custom gradle file
-        Helper.messageInfo("Calculating dependencies");
+        Logger.messageInfo("Calculating dependencies");
+        String repoURL = info.getString("repoUrl");
+        if (!StringUtils.isBlank(this.wfRepoURL) && !"unspecified".equals(this.wfRepoURL)) {
+          repoURL = this.wfRepoURL;
+        }
         StringBuilder gradle = new StringBuilder()
-            .append("plugins { id 'java' }\n")
-            .append("sourceCompatibility = '1.8'\n")
-            .append("targetCompatibility = '1.8'\n")
-            .append("repositories {\n")
-            .append(" maven { url '").append(info.getString("repoUrl")).append("' }\n")
-            .append(" mavenCentral()\n")
-            .append("}\n")
-            .append("dependencies {\n");
+          .append("plugins { id 'java' }\n")
+          .append("sourceCompatibility = '1.8'\n")
+          .append("targetCompatibility = '1.8'\n")
+          .append("repositories {\n")
+          .append(" maven { url '").append(repoURL).append("' }\n")
+          .append(" mavenCentral()\n")
+          .append("}\n")
+          .append("dependencies {\n");
         dependencies.forEach(d -> {
           JSONObject dep = (JSONObject) d;
           gradle
-              .append(" implementation '")
-              .append(dep.getString("group")).append(":")
-              .append(dep.getString("artifact")).append(":")
-              .append(dep.getString("version"));
+            .append(" implementation '")
+            .append(dep.getString("group")).append(":")
+            .append(dep.getString("artifact")).append(":")
+            .append(dep.getString("version"));
           String classifier = dep.optString("classifier", "");
           if (!"".equals(classifier)) {
             gradle.append(":").append(classifier);
@@ -204,71 +224,72 @@ public class InstallArtifact extends DefaultTask {
           gradle.append("'\n");
         });
         gradle.append("}\n")
-            .append("task getDeps(type: Copy) {\n")
-            .append(" from sourceSets.main.runtimeClasspath\n")
-            .append(" into '").append(depsDir.getAbsolutePath()).append("'\n")
-            .append("}");
+          .append("task getDeps(type: Copy) {\n")
+          .append(" from sourceSets.main.runtimeClasspath\n")
+          .append(" into '").append(depsDir.getAbsolutePath()).append("'\n")
+          .append("}");
         FileUtils.write(Helper.filePath(workDir.getAbsolutePath(), "build.gradle"), gradle.toString(), StandardCharsets.UTF_8);
         FileUtils.write(Helper.filePath(workDir.getAbsolutePath(), "settings.gradle"), "rootProject.name = 'newProjectName'", StandardCharsets.UTF_8);
-        Helper.exec("./gradlew getDeps -q -b " + Helper.path(workDir.getAbsolutePath(), "build.gradle"));
+        Helper.exec(("./gradlew getDeps -q -b " + Helper.path(workDir.getAbsolutePath(), "build.gradle")).split(" "));
 
         // Copy all jars into Warp 10 lib folder
-        Helper.messageInfo("Installing dependencies:");
+        Logger.messageInfo("Installing dependencies:");
         List<File> jarList = Arrays.stream(Objects.requireNonNull(depsDir.listFiles()))
-            .filter(f -> f.getName().endsWith(".jar"))
-            .collect(Collectors.toList());
-        for (File f: jarList) {
+          .filter(f -> f.getName().endsWith(".jar"))
+          .toList();
+        for (File f : jarList) {
           FileUtils.copyFile(f, Helper.filePath(this.warp10Dir, "lib", f.getName()));
-          Helper.messageSusccess("Dependency: " + f.getName() + " successfully deployed");
+          Logger.messageSusccess("Dependency: " + f.getName() + " successfully deployed");
         }
 
         // Process conf entries
-        Helper.messageInfo("Calculating properties");
+        Logger.messageInfo("Calculating properties");
         File propertyFile = Helper.filePath(this.warp10Dir, "etc", "conf.d", "99-" + pi.getGroup() + "-" + pi.getName() + ".conf");
         Properties props = new Properties();
         if (propertyFile.exists()) {
-          Helper.messageWarning(propertyFile.getAbsolutePath() + " already exists, will backup it");
+          Logger.messageWarning(propertyFile.getAbsolutePath() + " already exists, will backup it");
           SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
           String backupName = "_" + dateFormat.format(new Date());
           FileUtils.copyFile(propertyFile, new File(propertyFile.getAbsolutePath() + backupName));
         }
         StringBuilder properties = new StringBuilder();
         properties
-            .append("// -------------------------------------------------------------------------------------\n")
-            .append("// ").append(pi).append('\n')
-            .append("// -------------------------------------------------------------------------------------\n\n");
+          .append("// -------------------------------------------------------------------------------------\n")
+          .append("// ").append(pi).append('\n')
+          .append("// -------------------------------------------------------------------------------------\n\n");
 
         // Read conf Array
         if (info.has("conf")) {
           info.getJSONArray("conf").forEach(p -> {
-            if (((String) p).startsWith("//")) {
+            if (((String) p).startsWith("//") || ((String) p).startsWith("#")) {
               properties.append(p);
             } else {
               String[] currentProp = Arrays.stream(((String) p).split("=")).map(String::trim).toArray(String[]::new);
               if (props.containsKey(currentProp[0])) {
-                Helper.messageWarning(currentProp[0] + " already exists, bypassing");
+                Logger.messageWarning(currentProp[0] + " already exists, bypassing");
               } else {
-                props.put(currentProp[0], currentProp[1]);
+                props.put(currentProp[0], currentProp.length > 1 ? currentProp[1] : "");
               }
             }
           });
           props.forEach((k, v) -> properties.append(k).append("=").append(v).append('\n'));
         } else {
           if ("plugin".equals(info.getString("type"))) {
-            Helper.messageWarning("No configuration found, do not forget to add 'warpscript.plugins.xxx = package.class'");
+            Logger.messageWarning("No configuration found, do not forget to add 'warpscript.plugins.xxx = package.class'");
           }
           if ("ext".equals(info.getString("type"))) {
-            Helper.messageWarning("No configuration found, do not forget to add 'warpscript.extension.xxx = package.class'");
+            Logger.messageWarning("No configuration found, do not forget to add 'warpscript.extension.xxx = package.class'");
           }
         }
         FileUtils.write(propertyFile, properties.toString(), StandardCharsets.UTF_8, false);
+        Logger.messageSusccess(pi + " installed successfully.\nDo not forget to check the configuration file: " + propertyFile.getAbsolutePath());
 
         if (workDir.exists()) {
           FileUtils.deleteDirectory(workDir);
         }
       }
     } catch (Throwable e) {
-      Helper.messageError(e.getMessage());
+      Logger.messageError(e.getMessage());
     }
   }
 
@@ -384,5 +405,24 @@ public class InstallArtifact extends DefaultTask {
   @Option(option = "classifier", description = "Artifact's classifier, ie: uberjar")
   public void setWfClassifier(String wfClassifier) {
     this.wfClassifier = wfClassifier;
+  }
+
+  /**
+   * Gets wf repo url.
+   *
+   * @return the wf repo url
+   */
+  public String getWfRepoURL() {
+    return wfRepoURL;
+  }
+
+  /**
+   * Sets wf repo url.
+   *
+   * @param wfRepoURL the wf repo url
+   */
+  @Option(option = "repoURL", description = "Artifact's maven like repo url")
+  public void setWfRepoURL(String wfRepoURL) {
+    this.wfRepoURL = wfRepoURL;
   }
 }

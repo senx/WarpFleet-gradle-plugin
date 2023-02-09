@@ -87,21 +87,34 @@ $ ./gradlew -q getArtifactInfo --group=io.warp10 --artifact=warp10-plugin-warpst
 
 Single Artifact installation
 
-    $ ./gradlew -q installArtifact --group=io.warp10 --artifact=warp10-plugin-warpstudio --vers=2.0.3 --dest=/opt/warp10
-    $ ./gradlew -q installArtifact --group=io.warp10 --artifact=warp10-plugin-warpstudio --vers=latest --dest=/opt/warp10
-    $ ./gradlew -q installArtifact --group=io.warp10 --artifact=warp10-plugin-warpstudio --dest=/opt/warp10
+    $ ./gradlew -q wfInstall --group=io.warp10 --artifact=warp10-plugin-warpstudio --vers=2.0.3 --dest=/opt/warp10
+    $ ./gradlew -q wfInstall --group=io.warp10 --artifact=warp10-plugin-warpstudio --vers=latest --dest=/opt/warp10
+    $ ./gradlew -q wfInstall --group=io.warp10 --artifact=warp10-plugin-warpstudio --dest=/opt/warp10
 
 With the packages syntax
 
-    $ ./gradlew -q installArtifact --packages=io.warp10:warp10-plugin-warpstudio:2.0.3:jar --dest=/opt/warp10
-    $ ./gradlew -q installArtifact --packages=io.warp10:warp10-plugin-warpstudio:2.0.3 --dest=/opt/warp10
-    $ ./gradlew -q installArtifact --packages=io.warp10:warp10-plugin-warpstudio:latest --dest=/opt/warp10
-    $ ./gradlew -q installArtifact --packages=io.warp10:warp10-plugin-warpstudio --dest=/opt/warp10
+    $ ./gradlew -q wfInstall --packages=io.warp10:warp10-plugin-warpstudio:2.0.3:jar --dest=/opt/warp10
+    $ ./gradlew -q wfInstall --packages=io.warp10:warp10-plugin-warpstudio:2.0.3 --dest=/opt/warp10
+    $ ./gradlew -q wfInstall --packages=io.warp10:warp10-plugin-warpstudio:latest --dest=/opt/warp10
+    $ ./gradlew -q wfInstall --packages=io.warp10:warp10-plugin-warpstudio --dest=/opt/warp10
 
 Multiple artefacts
 
-    $ ./gradlew -q installArtifact \
+    $ ./gradlew -q wfInstall \
         --packages=io.warp10:warp10-plugin-warpstudio:latest,io.warp10:warp10-ext-barcode \
         --dest=/opt/warp10
 
+
+### *wfDoc* - Generate documentation
+
+For instance for `@path/to/macro` and `/path/to/root/folder/path/to/macro.mc2`
+
+You should use:
+
+    ./gradlew -q wfDoc \
+        --url=https://warp10.server/api/v0/exec \ 
+        --source=/path/to/root/folder \             # where your Warpscripts are located  
+        --dest=./doc \                              # documentation destination
+        --macroDir=path \                           # root path of your macros
+        --format=json                               # json by default (could be html or md)
 

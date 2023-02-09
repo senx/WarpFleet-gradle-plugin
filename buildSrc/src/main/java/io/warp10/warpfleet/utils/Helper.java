@@ -20,32 +20,26 @@ import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
 import kong.unirest.json.JSONArray;
 import kong.unirest.json.JSONObject;
+import org.apache.commons.io.FileUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
 /**
  * The type Helper.
  */
-@SuppressWarnings("unused")
 public class Helper {
   private static final String WF_URL = "https://warpfleet.senx.io/api";
 
-  private static final String ANSI_RESET = "\u001B[0m";
-  private static final String ANSI_BLACK = "\u001B[30m";
-  private static final String ANSI_RED = "\u001B[31m";
-  private static final String ANSI_GREEN = "\u001B[32m";
-  private static final String ANSI_YELLOW = "\u001B[33m";
-  private static final String ANSI_BLUE = "\u001B[34m";
-  private static final String ANSI_PURPLE = "\u001B[35m";
-  private static final String ANSI_CYAN = "\u001B[36m";
-  private static final String ANSI_WHITE = "\u001B[37m";
-  private static final String ANSI_CHECK = "\u2714";
-  private static final String ANSI_CROSS = "\u2716";
-  private static final String ANSI_INFO = "\u25CB";
-  private static final String ANSI_WARN = "/!\\";
+  /**
+   * Instantiates a new Helper.
+   */
+  Helper() {
+  }
 
   /**
    * Gets groups.
@@ -54,12 +48,12 @@ public class Helper {
    */
   public static JSONArray getGroups() {
     return Unirest.get(Helper.WF_URL + "/")
-        .header("accept", "application/json")
-        .asJson()
-        .ifFailure(Helper::processHTTPError)
-        .getBody()
-        .getObject()
-        .getJSONArray("children");
+      .header("accept", "application/json")
+      .asJson()
+      .ifFailure(Helper::processHTTPError)
+      .getBody()
+      .getObject()
+      .getJSONArray("children");
   }
 
   /**
@@ -71,15 +65,14 @@ public class Helper {
    */
   public static JSONObject getVersions(String group, String artifact) {
     return Unirest.get(Helper.WF_URL + "/{group}/{artifact}")
-        .routeParam("group", group)
-        .routeParam("artifact", artifact)
-        .header("accept", "application/json")
-        .asJson()
-        .ifFailure(Helper::processHTTPError)
-        .getBody()
-        .getObject();
+      .routeParam("group", group)
+      .routeParam("artifact", artifact)
+      .header("accept", "application/json")
+      .asJson()
+      .ifFailure(Helper::processHTTPError)
+      .getBody()
+      .getObject();
   }
-
 
   /**
    * Gets artifact info.
@@ -101,14 +94,14 @@ public class Helper {
    */
   public static JSONObject getArtifactInfo(String group, String artifact, String version) {
     return Unirest.get(Helper.WF_URL + "/{group}/{artifact}/{version}")
-        .routeParam("group", group)
-        .routeParam("artifact", artifact)
-        .routeParam("version", version)
-        .header("accept", "application/json")
-        .asJson()
-        .ifFailure(Helper::processHTTPError)
-        .getBody()
-        .getObject();
+      .routeParam("group", group)
+      .routeParam("artifact", artifact)
+      .routeParam("version", version)
+      .header("accept", "application/json")
+      .asJson()
+      .ifFailure(Helper::processHTTPError)
+      .getBody()
+      .getObject();
   }
 
   /**
@@ -119,13 +112,13 @@ public class Helper {
    */
   public static JSONArray getArtifacts(String group) {
     return Unirest.get(Helper.WF_URL + "/{group}")
-        .routeParam("group", group)
-        .header("accept", "application/json")
-        .asJson()
-        .ifFailure(Helper::processHTTPError)
-        .getBody()
-        .getObject()
-        .getJSONArray("children");
+      .routeParam("group", group)
+      .header("accept", "application/json")
+      .asJson()
+      .ifFailure(Helper::processHTTPError)
+      .getBody()
+      .getObject()
+      .getJSONArray("children");
   }
 
   /**
@@ -137,13 +130,13 @@ public class Helper {
    */
   public static JSONObject getLatest(String group, String artifact) {
     return Unirest.get(Helper.WF_URL + "/{group}/{artifact}")
-        .routeParam("group", group)
-        .routeParam("artifact", artifact)
-        .header("accept", "application/json")
-        .asJson()
-        .ifFailure(Helper::processHTTPError)
-        .getBody()
-        .getObject();
+      .routeParam("group", group)
+      .routeParam("artifact", artifact)
+      .header("accept", "application/json")
+      .asJson()
+      .ifFailure(Helper::processHTTPError)
+      .getBody()
+      .getObject();
   }
 
   /**
@@ -153,15 +146,16 @@ public class Helper {
    * @throws InterruptedException the interrupted exception
    * @throws IOException          the io exception
    */
-  public static void exec(String command) throws InterruptedException, IOException {
+  public static void exec(String[] command) throws InterruptedException, IOException {
     Runtime rt = Runtime.getRuntime();
     Process pr = rt.exec(command);
     new Thread(() -> {
       BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
       String line;
       try {
-        while ((line = input.readLine()) != null)
-          messageInfo(line);
+        while ((line = input.readLine()) != null) {
+          Logger.messageInfo(line);
+        }
       } catch (IOException e) {
         e.printStackTrace();
       }
@@ -171,7 +165,7 @@ public class Helper {
       String line;
       try {
         while ((line = input.readLine()) != null)
-          messageError(ANSI_RED + line + ANSI_RESET);
+          Logger.messageError(Logger.ANSI_RED + line + Logger.ANSI_RESET);
       } catch (IOException e) {
         e.printStackTrace();
       }
@@ -185,47 +179,11 @@ public class Helper {
    * @param response the response
    */
   public static void processHTTPError(HttpResponse<?> response) {
-    messageError("Oh No! Status" + response.getStatus());
+    Logger.messageError("Oh No! Status: " + response.getStatus());
     response.getParsingError().ifPresent(e -> {
-      messageError("Parsing Exception: " + e.getMessage());
-      messageError("Original body: " + e.getOriginalBody());
+      Logger.messageError("Parsing Exception: " + e.getMessage());
+      Logger.messageError("Original body: " + e.getOriginalBody());
     });
-  }
-
-  /**
-   * Message info.
-   *
-   * @param message the message
-   */
-  public static void messageInfo(String message) {
-    System.out.println(ANSI_CYAN + ANSI_INFO + " " + message + ANSI_RESET);
-  }
-
-  /**
-   * Message error.
-   *
-   * @param message the message
-   */
-  public static void messageError(String message) {
-    System.out.println(ANSI_RED + ANSI_CROSS + " " + message + ANSI_RESET);
-  }
-
-  /**
-   * Message susccess.
-   *
-   * @param message the message
-   */
-  public static void messageSusccess(String message) {
-    System.out.println(ANSI_GREEN + ANSI_CHECK + " " + message + ANSI_RESET);
-  }
-
-  /**
-   * Message warning.
-   *
-   * @param message the message
-   */
-  public static void messageWarning(String message) {
-    System.out.println(ANSI_YELLOW + ANSI_WARN + " " + message + ANSI_RESET);
   }
 
   /**
@@ -246,5 +204,73 @@ public class Helper {
    */
   public static File filePath(String... dirs) {
     return new File(path(dirs));
+  }
+
+  /**
+   * Gets macro.
+   *
+   * @param group     the group
+   * @param artifact  the artifact
+   * @param version   the version
+   * @param macro     the macro
+   * @param warp10Dir the warp 10 dir
+   * @throws IOException the io exception
+   */
+  public static void getMacro(String group, String artifact, String version, JSONObject macro, String warp10Dir) throws IOException {
+    File dest = filePath(warp10Dir, "lib", macro.getString("path"));
+    // Create macro dir
+    if (!dest.getParentFile().exists()) {
+      if (!dest.getParentFile().mkdirs()) {
+        throw new IOException("Cannot write " + dest.getAbsolutePath());
+      }
+    }
+    // Get macro
+    String macroContent = Unirest.get(Helper.WF_URL + "/{group}/{artifact}/{version}/{macro}")
+      .routeParam("group", group)
+      .routeParam("artifact", artifact)
+      .routeParam("version", version)
+      .routeParam("macro", macro.getString("path"))
+      .asString()
+      .ifFailure(Helper::processHTTPError)
+      .getBody();
+    FileUtils.write(dest, macroContent, StandardCharsets.UTF_8);
+  }
+
+  /**
+   * Gets file as string.
+   *
+   * @param fileName the file name
+   * @param clazz    the clazz
+   * @return the file as string
+   * @throws IOException              the io exception
+   * @throws IllegalArgumentException the illegal argument exception
+   */
+  public static String getFileAsString(final String fileName, Class<?> clazz) throws IOException, IllegalArgumentException {
+    InputStream is = Helper.getFileAsIOStream(fileName, clazz);
+    StringBuilder sb = new StringBuilder();
+    try (InputStreamReader isr = new InputStreamReader(is);
+         BufferedReader br = new BufferedReader(isr)) {
+      String line;
+      while ((line = br.readLine()) != null) {
+        sb.append(line).append('\n');
+      }
+      is.close();
+    }
+    return sb.toString();
+  }
+
+  /**
+   * Gets file as io stream.
+   *
+   * @param fileName the file name
+   * @param clazz    the clazz
+   * @return the file as io stream
+   */
+  public static InputStream getFileAsIOStream(final String fileName, Class<?> clazz) {
+    InputStream ioStream = clazz.getClassLoader().getResourceAsStream(fileName);
+    if (ioStream == null) {
+      throw new IllegalArgumentException(fileName + " is not found");
+    }
+    return ioStream;
   }
 }

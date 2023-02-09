@@ -14,7 +14,7 @@
  *   limitations under the License.
  */
 
-package io.warp10.warpfleet;
+package io.warp10.warpfleet.actions;
 
 import io.warp10.warpfleet.utils.Constants;
 import io.warp10.warpfleet.utils.Helper;
@@ -28,6 +28,9 @@ import org.gradle.api.tasks.TaskAction;
 @SuppressWarnings("unused")
 public class GetGroups extends DefaultTask {
 
+  /**
+   * Instantiates a new Get groups.
+   */
   public GetGroups() {
     this.setDescription("Get list of available groups");
     this.setGroup(Constants.GROUP);

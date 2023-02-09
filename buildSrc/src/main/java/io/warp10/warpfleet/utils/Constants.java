@@ -16,6 +16,19 @@
 
 package io.warp10.warpfleet.utils;
 
+/**
+ * The type Constants.
+ */
 public class Constants {
+  /**
+   * Instantiates a new Constants.
+   */
+  Constants() {
+
+  }
+
+  /**
+   * The constant GROUP.
+   */
   public static String GROUP = "WarpFleet";
 }
