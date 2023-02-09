@@ -129,8 +129,12 @@ public class GenerateDocumentation extends DefaultTask {
     });
     AtomicReference<AbstractGenerator> generator = new AtomicReference<>();
     switch (this.getWfFormat()) {
-      case "json" -> generator.set(new JSONGenerator());
-      default -> generator.set(new JSONGenerator());
+      case "json":
+        generator.set(new JSONGenerator());
+        break;
+      default:
+        generator.set(new JSONGenerator());
+        break;
     }
     String dest = this.getWfDest();
     if (dest.startsWith(".")) {
