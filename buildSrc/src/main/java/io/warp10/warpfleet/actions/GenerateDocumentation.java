@@ -24,6 +24,7 @@ import io.warp10.warpfleet.utils.Logger;
 import kong.unirest.Unirest;
 import kong.unirest.json.JSONArray;
 import kong.unirest.json.JSONObject;
+import org.apache.commons.io.FileUtils;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.Optional;
@@ -102,7 +103,7 @@ public class GenerateDocumentation extends DefaultTask {
     ));
     fileList.forEach(f -> {
       try {
-        String macroWS = Files.readString(Paths.get(f.getString("fileObj")), StandardCharsets.UTF_8);
+        String macroWS = FileUtils.readFileToString(new File(f.getString("fileObj")), StandardCharsets.UTF_8);
         String macro = "@" + f.getString("file").replace(".mc2", "");
         String tpl;
         try {
