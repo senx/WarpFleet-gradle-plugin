@@ -17,6 +17,7 @@
 package io.warp10.warpfleet.actions;
 
 import io.warp10.warpfleet.doc.generators.AbstractGenerator;
+import io.warp10.warpfleet.doc.generators.HTMLGenerator;
 import io.warp10.warpfleet.doc.generators.JSONGenerator;
 import io.warp10.warpfleet.doc.generators.MarkdownGenerator;
 import io.warp10.warpfleet.utils.Constants;
@@ -113,7 +114,7 @@ public class GenerateDocumentation extends DefaultTask {
           Logger.messageError("Error, cannot read infomode.tpl ");
           throw new RuntimeException(e);
         }
-        tpl = tpl.replace("${macro}", wrapMacro(macroWS));
+        tpl = tpl.replace("{{macro}}", wrapMacro(macroWS));
         Logger.messageInfo("Generating documentation for " + macro);
         String res = Unirest.post(this.getWfURL())
           .header("Content-Type", "text/plain")
@@ -135,6 +136,9 @@ public class GenerateDocumentation extends DefaultTask {
       case "md":
       case "markdown":
         generator.set(new MarkdownGenerator());
+        break;
+      case "html":
+        generator.set(new HTMLGenerator());
         break;
       case "json":
       default:

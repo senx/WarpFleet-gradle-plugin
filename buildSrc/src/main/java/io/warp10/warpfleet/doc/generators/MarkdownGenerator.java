@@ -26,6 +26,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * The type Markdown generator.
@@ -62,14 +63,23 @@ public class MarkdownGenerator extends AbstractGenerator {
         title = "@" + title;
       }
       index.add(new JSONObject().put("f", fName).put("title", title));
-      String md = "# `" + title + "`\n\n" +
-        docObj.optString("desc", "") + "\n\n" +
-        this.generateRelated(docObj.optJSONArray("related"))  +
-        this.generateMarkdownSignatures(this.generateSignature(docObj), title) +
-        this.generateMarkdownSamples(docObj);
-      FileUtils.write(f, md, StandardCharsets.UTF_8);
+      FileUtils.write(f, this.getMarkdown(docObj, title), StandardCharsets.UTF_8);
     }
+    String toc = index.stream().map(i -> {
+      try {
+        return this.generateIndex(i, dest.getCanonicalPath());
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }).collect(Collectors.joining("\n"));
+    FileUtils.write(new File(dest.getCanonicalPath() + File.separator + "index.md"), toc, StandardCharsets.UTF_8);
     return index;
+  }
+
+  private String generateIndex(JSONObject i, String dest) {
+    return "- [" +
+      i.optString("title", "") + "](./" +
+      i.optString("f", "").replace(dest, "") + ")\n";
   }
 
   private String generateMarkdownSamples(JSONObject doc) {
@@ -93,7 +103,7 @@ public class MarkdownGenerator extends AbstractGenerator {
     JSONArray signatures = sig.optJSONArray("signatures");
     if (null == signatures) signatures = new JSONArray();
 
-    StringBuilder md = new StringBuilder().append("## Signatures");
+    StringBuilder md = new StringBuilder().append("## Signatures\n\n");
     signatures.forEach(sign -> {
       JSONObject signature = (JSONObject) sign;
       md.append("- ");
@@ -118,7 +128,7 @@ public class MarkdownGenerator extends AbstractGenerator {
         }
 
         if (!item.getBoolean("isArray") && !item.getBoolean("isObject")) {
-          md.append(this.formatParam(item.optJSONObject("sigDesc"))).append(" ");
+          md.append(this.formatParam(item.optJSONObject("sigItems"))).append(" ");
         }
       });
       md.append("`").append(fnName).append("` ");
@@ -143,7 +153,7 @@ public class MarkdownGenerator extends AbstractGenerator {
         }
 
         if (!item.getBoolean("isArray") && !item.getBoolean("isObject")) {
-          md.append(this.formatParam(item.optJSONObject("sigDesc"))).append(" ");
+          md.append(this.formatParam(item.optJSONObject("sigItems"))).append(" ");
         }
 
       });
@@ -168,6 +178,21 @@ public class MarkdownGenerator extends AbstractGenerator {
     return md.toString();
   }
 
+  /**
+   * Gets markdown.
+   *
+   * @param docObj the doc obj
+   * @param title  the title
+   * @return the markdown
+   */
+  protected String getMarkdown(JSONObject docObj, String title) {
+    return "# `" + title + "`\n\n" +
+      docObj.optString("desc", "") + "\n\n" +
+      this.generateRelated(docObj.optJSONArray("related")) +
+      this.generateMarkdownSignatures(this.generateSignature(docObj), title) +
+      this.generateMarkdownSamples(docObj);
+  }
+
   private String generateRelated(JSONArray related) {
     if (null == related) return "";
     StringBuilder md = new StringBuilder().append("## See also\n\n");
@@ -178,8 +203,8 @@ public class MarkdownGenerator extends AbstractGenerator {
         .append(rel.optString("b64", ""))
         .append(".md](")
         .append(rel.optString("label", ""))
-        .append(")\n\n");
+        .append(")\n");
     });
-    return null;
+    return md.append('\n').toString();
   }
 }

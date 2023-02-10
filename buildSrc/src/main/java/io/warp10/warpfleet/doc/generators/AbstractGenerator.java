@@ -180,6 +180,7 @@ public abstract class AbstractGenerator {
             );
         }
       });
+      signatures.add(signature);
     });
     return new JSONObject()
       .put("input", input)

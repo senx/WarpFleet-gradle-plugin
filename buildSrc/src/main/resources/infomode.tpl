@@ -20,7 +20,7 @@
   %>
   IFTE
 %> 'mantranslate' STORE
-${macro}
+{{macro}}
 {} 'data' STORE
 <%
  <% $macro EVAL %> <% %> <% %> TRY DUP

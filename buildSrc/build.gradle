@@ -1,15 +1,15 @@
 plugins {
-  id 'java'
-  id 'idea'
-  id 'eclipse'
-  id 'maven-publish'
-  id 'java-gradle-plugin'
-  id 'signing'
-  id 'net.nemerosa.versioning' version "2.15.1"
-  id 'io.codearte.nexus-staging' version "0.30.0"
+    id 'java'
+    id 'idea'
+    id 'eclipse'
+    id 'maven-publish'
+    id 'java-gradle-plugin'
+    id 'signing'
+    id 'net.nemerosa.versioning' version "2.15.1"
+    id 'io.codearte.nexus-staging' version "0.30.0"
 }
 versioning {
-  gitRepoRootDir = '../'
+    gitRepoRootDir = '../'
 }
 
 println versioning.info.full
@@ -21,141 +21,143 @@ project.description = 'WarpFleet Gradle Plugin'
 project.version = versioning.info.lastTag + ((versioning.info.tag != null) ? '' : '-' + versioning.info.build)
 
 java {
-  withJavadocJar()
-  withSourcesJar()
+    withJavadocJar()
+    withSourcesJar()
 }
 
 repositories {
-  mavenCentral()
+    mavenCentral()
 }
 configurations {
-  provided
+    provided
 }
 
 sourceSets {
-  main {
-    compileClasspath = compileClasspath + configurations.provided
-  }
+    main {
+        compileClasspath = compileClasspath + configurations.provided
+    }
 }
 
 
 dependencies {
-  implementation 'com.konghq:unirest-java:3.14.1'
-  implementation 'commons-io:commons-io:2.11.0'
-  implementation 'org.apache.commons:commons-lang3:3.12.0'
+    implementation 'com.konghq:unirest-java:3.14.1'
+    implementation 'commons-io:commons-io:2.11.0'
+    implementation 'org.apache.commons:commons-lang3:3.12.0'
+    implementation 'org.apache.commons:commons-text:1.10.0'
+    implementation 'com.vladsch.flexmark:flexmark-all:0.64.0'
 }
 
 gradlePlugin {
-  automatedPublishing = false
-  plugins {
-    WFPlugin {
-      id = 'io.warp10.warpfleet-gradle-plugin'
-      displayName = 'WarpFleet Gradle Plugin'
-      implementationClass = 'io.warp10.warpfleet.WFPlugin'
+    automatedPublishing = false
+    plugins {
+        WFPlugin {
+            id = 'io.warp10.warpfleet-gradle-plugin'
+            displayName = 'WarpFleet Gradle Plugin'
+            implementationClass = 'io.warp10.warpfleet.WFPlugin'
+        }
     }
-  }
 }
 
 jar {
-  manifest {
-    attributes('WarpFleet-Description': project.description)
-    attributes('WarpFleet-Group': project.group)
-    attributes('WarpFleet-Artifact': project.name)
-    attributes('WarpFleet-Version': project.version)
-  }
+    manifest {
+        attributes('WarpFleet-Description': project.description)
+        attributes('WarpFleet-Group': project.group)
+        attributes('WarpFleet-Artifact': project.name)
+        attributes('WarpFleet-Version': project.version)
+    }
 
-  from('src/main/warpscript') {
-    //
-    // Only consider macros which are in our namespace
-    //
-    include project.group + '/' + project.name + '/*.mc2'
-    include project.group + '/' + project.name + '/**/*.mc2'
-  }
+    from('src/main/warpscript') {
+        //
+        // Only consider macros which are in our namespace
+        //
+        include project.group + '/' + project.name + '/*.mc2'
+        include project.group + '/' + project.name + '/**/*.mc2'
+    }
 
-  from('.') {
-    include 'README.md'
-    include project.group + '-' + project.name + '.conf'
-  }
+    from('.') {
+        include 'README.md'
+        include project.group + '-' + project.name + '.conf'
+    }
 }
 
 publishing {
-  publications {
-    maven(MavenPublication) {
-      groupId project.group
-      artifactId project.name
-      version = project.version
-      from components.java
-      pom {
-        name = project.name
-        description = project.description
-        url = 'https://github.com/senx/WarpFleet-gradle-plugin'
+    publications {
+        maven(MavenPublication) {
+            groupId project.group
+            artifactId project.name
+            version = project.version
+            from components.java
+            pom {
+                name = project.name
+                description = project.description
+                url = 'https://github.com/senx/WarpFleet-gradle-plugin'
 
-        scm {
-          connection = 'scm:git:git://github.com/senx/WarpFleet-gradle-plugin'
-          developerConnection = 'scm:git:ssh://github.com/senx/WarpFleet-gradle-plugin'
-          url = 'https://github.com/senx/WarpFleet-gradle-plugin'
-        }
+                scm {
+                    connection = 'scm:git:git://github.com/senx/WarpFleet-gradle-plugin'
+                    developerConnection = 'scm:git:ssh://github.com/senx/WarpFleet-gradle-plugin'
+                    url = 'https://github.com/senx/WarpFleet-gradle-plugin'
+                }
 
-        licenses {
-          license {
-            name = 'The Apache License, Version 2.0'
-            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-          }
-        }
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
 
-        developers {
-          developer {
-            id = 'senx'
-            name = 'SenX'
-            email = 'contact@senx.io'
-          }
+                developers {
+                    developer {
+                        id = 'senx'
+                        name = 'SenX'
+                        email = 'contact@senx.io'
+                    }
+                }
+            }
         }
-      }
     }
-  }
 
-  repositories {
-    if (project.hasProperty('ossrhUsername')) {
-      maven {
-        url 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
-        credentials {
-          username ossrhUsername
-          password ossrhPassword
+    repositories {
+        if (project.hasProperty('ossrhUsername')) {
+            maven {
+                url 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
+                credentials {
+                    username ossrhUsername
+                    password ossrhPassword
+                }
+            }
         }
-      }
-    }
-    if (project.hasProperty('nexusUsername')) {
-      maven {
-        name 'nexus'
-        allowInsecureProtocol true
-        url "$nexusHost/repository/maven-releases/"
-        credentials {
-          username nexusUsername
-          password nexusPassword
+        if (project.hasProperty('nexusUsername')) {
+            maven {
+                name 'nexus'
+                allowInsecureProtocol true
+                url "$nexusHost/repository/maven-releases/"
+                credentials {
+                    username nexusUsername
+                    password nexusPassword
+                }
+            }
         }
-      }
     }
-  }
 }
 
 artifacts {
-  archives jar, javadocJar, sourcesJar
+    archives jar, javadocJar, sourcesJar
 }
 
 if (project.hasProperty('ossrhUsername')) {
-  nexusStaging {
-    packageGroup = 'io.warp10'
-    username ossrhUsername
-    password ossrhPassword
-  }
+    nexusStaging {
+        packageGroup = 'io.warp10'
+        username ossrhUsername
+        password ossrhPassword
+    }
 }
 
 //
 // Artifact Signing
 //
 if (project.hasProperty('signing.gnupg.keyName')) {
-  signing {
-    useGpgCmd()
-    sign publishing.publications
-  }
+    signing {
+        useGpgCmd()
+        sign publishing.publications
+    }
 }
