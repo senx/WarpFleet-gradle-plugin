@@ -67,7 +67,7 @@ public class MarkdownGenerator extends AbstractGenerator {
     }
     String toc = index.stream().map(i -> {
       try {
-        return this.generateIndex(i, dest.getCanonicalPath());
+        return this.generateMDIndex(i, dest.getCanonicalPath());
       } catch (IOException e) {
         throw new RuntimeException(e);
       }
@@ -76,7 +76,7 @@ public class MarkdownGenerator extends AbstractGenerator {
     return index;
   }
 
-  private String generateIndex(JSONObject i, String dest) {
+  private String generateMDIndex(JSONObject i, String dest) {
     return "- [" +
       i.optString("title", "") + "](./" +
       i.optString("f", "").replace(dest, "") + ")\n";

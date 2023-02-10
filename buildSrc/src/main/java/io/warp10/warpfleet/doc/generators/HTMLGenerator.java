@@ -16,13 +16,11 @@
 
 package io.warp10.warpfleet.doc.generators;
 
-import com.vladsch.flexmark.ext.aside.AsideExtension;
 import com.vladsch.flexmark.ext.attributes.AttributesExtension;
 import com.vladsch.flexmark.ext.autolink.AutolinkExtension;
 import com.vladsch.flexmark.ext.gitlab.GitLabExtension;
 import com.vladsch.flexmark.ext.tables.TablesExtension;
-import com.vladsch.flexmark.ext.toc.SimTocExtension;
-import com.vladsch.flexmark.ext.toc.TocExtension;
+import com.vladsch.flexmark.ext.typographic.TypographicExtension;
 import com.vladsch.flexmark.ext.wikilink.WikiLinkExtension;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
@@ -42,10 +40,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * The type Markdown generator.
+ * The type Html generator.
  */
 public class HTMLGenerator extends MarkdownGenerator {
-  final private static DataHolder OPTIONS = new MutableDataSet()
+  /**
+   * The constant OPTIONS.
+   */
+  protected final static DataHolder OPTIONS = new MutableDataSet()
     .set(HtmlRenderer.INDENT_SIZE, 2)
     .set(Parser.HTML_BLOCK_DEEP_PARSER, true)
     .set(Parser.HTML_BLOCK_DEEP_PARSE_BLANK_LINE_INTERRUPTS, false)
@@ -60,18 +61,22 @@ public class HTMLGenerator extends MarkdownGenerator {
       Arrays.asList(
         TablesExtension.create(),
         AttributesExtension.create(),
-        SimTocExtension.create(),
-        TocExtension.create(),
         AutolinkExtension.create(),
-        AsideExtension.create(),
-        GitLabExtension.create()
+        GitLabExtension.create(),
+        TypographicExtension.create()
       )
     );
-  private final Parser parser = Parser.builder(OPTIONS).build();
-  private final HtmlRenderer renderer = HtmlRenderer.builder(OPTIONS).build();
+  /**
+   * The Parser.
+   */
+  protected final Parser parser = Parser.builder(OPTIONS).build();
+  /**
+   * The Renderer.
+   */
+  protected final HtmlRenderer renderer = HtmlRenderer.builder(OPTIONS).build();
 
   /**
-   * Instantiates a new Markdown generator.
+   * Instantiates a new Html generator.
    */
   public HTMLGenerator() {
   }
@@ -105,7 +110,7 @@ public class HTMLGenerator extends MarkdownGenerator {
 
     String toc = index.stream().map(i -> {
       try {
-        return this.generateIndex(i, dest.getCanonicalPath());
+        return this.generateHTMLIndex(i, dest.getCanonicalPath());
       } catch (IOException e) {
         throw new RuntimeException(e);
       }
@@ -114,13 +119,27 @@ public class HTMLGenerator extends MarkdownGenerator {
     return index;
   }
 
-  private String generateIndex(JSONObject i, String dest) {
+  /**
+   * Generate html index string.
+   *
+   * @param i    the
+   * @param dest the dest
+   * @return the string
+   */
+  protected String generateHTMLIndex(JSONObject i, String dest) {
     return "<li><a href=\"./" + i.optString("f", "").replace(dest, "") + "\">" +
       i.optString("title", "") +
       "</a></li>";
   }
 
-  private String wrapHTML(String html, String title) {
+  /**
+   * Wrap html string.
+   *
+   * @param html  the html
+   * @param title the title
+   * @return the string
+   */
+  protected String wrapHTML(String html, String title) {
     String tpl;
     try {
       tpl = Helper.getFileAsString("html.tpl", getClass());

@@ -109,6 +109,15 @@ Multiple artefacts
 
 For instance for `@path/to/macro` and `/path/to/root/folder/path/to/macro.mc2`
 
+Output format:
+
+- default: `json`
+- `json`: JSON files
+- `md` or `markdown`: Markdown files with an index
+- `html`: HTML pages with an index.
+- `pdf`: PDF files generation, one page per macro in a single file
+
+
 You should use:
 
     ./gradlew -q wfDoc \
@@ -116,5 +125,5 @@ You should use:
         --source=/path/to/root/folder \             # where your Warpscripts are located  
         --dest=./doc \                              # documentation destination
         --macroDir=path \                           # root path of your macros
-        --format=json                               # json by default (could be html or md)
+        --format=json                               # json by default (could be html, pdf or md)
 

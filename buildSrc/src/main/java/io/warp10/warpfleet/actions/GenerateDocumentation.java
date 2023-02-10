@@ -20,6 +20,7 @@ import io.warp10.warpfleet.doc.generators.AbstractGenerator;
 import io.warp10.warpfleet.doc.generators.HTMLGenerator;
 import io.warp10.warpfleet.doc.generators.JSONGenerator;
 import io.warp10.warpfleet.doc.generators.MarkdownGenerator;
+import io.warp10.warpfleet.doc.generators.PDFGenerator;
 import io.warp10.warpfleet.utils.Constants;
 import io.warp10.warpfleet.utils.Helper;
 import io.warp10.warpfleet.utils.Logger;
@@ -139,6 +140,9 @@ public class GenerateDocumentation extends DefaultTask {
         break;
       case "html":
         generator.set(new HTMLGenerator());
+        break;
+      case "pdf":
+        generator.set(new PDFGenerator());
         break;
       case "json":
       default:

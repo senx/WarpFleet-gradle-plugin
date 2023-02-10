@@ -2,141 +2,178 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
+    <base href="/">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{title}}</title>
     <style>
         @import 'https://fonts.googleapis.com/css?family=Quicksand:300,400,500';
-
-       body {
-           font-family: "Quicksand", "Helvetica", "Arial", sans-serif;
-           color: #555;
-           line-height: 1.5;
-           margin: 0;
-       }
-
-       header {
-           min-height: 50px;
-           padding: 0;
-           background-color: #404040;
-           color: #fff;
-       }
-
-       header img {
-           max-height: 50px;
-       }
-
-       a {
-           color: #004eff;
-       }
-
-        header a {
-            color: #fff;
-            padding-left: 1em;
+        * {
+            font-size: 1em;
+        }
+        body {
+            font-family: "Quicksand", "Helvetica", "Arial", sans-serif;
+            color: #555;
+            line-height: 1.5;
+            margin: 0;
         }
 
-       main, .content {
-           max-width: 50em;
-           margin: 0 auto;
-           padding: 1em;
-       }
+        header {
+            min-height: 50px;
+            padding: 0;
+            background-color: #404040;
+            color: #fff;
+        }
 
-       .content {
-           display: flex;
-           align-items: center;
-           justify-content: space-between;
-       }
-
-       h2 {
-           margin-top: 1em;
-           padding-top: 1em;
-       }
-
-       h1, h2, strong, h1 a {
-           color: #333;
-       }
-
-       code, pre {
-           background: #eee;
-       }
-
-       code {
-           padding: 2px 4px;
-           vertical-align: text-bottom;
-       }
-
-       pre {
-           padding: 1em;
-       }
-
-       pre {
-           display: block;
-           unicode-bidi: embed;
-           font-family: monospace;
-           white-space: pre;
-       }
-
-       pre, var {
-           font-weight: 500;
-       }
-
-       kbd {
-           background-color: #c0c0c0;
-           color: #000000;
-           margin-left: 0.5em;
-           padding: 5px;
-       }
-
-       ul.related {
-           padding-left: 0;
-           list-style: none;
-       }
-
-       ul.related li {
+        header img {
+           max-height: 50px;
+           width: auto;
            display: inline-block;
-           margin-right: 0.5rem;
-       }
+           margin-left: 0;
+           margin-right: auto;
+           height: 100%;
+        }
 
-       var {
-           color: #404040;
-           margin-left: 0.5em;
-       }
+        a {
+            color: #004eff;
+        }
 
-       .siginlinetype {
-           color: #a0a0a0;
-       }
+        .links {
+            display: inline-block;
+            margin-left: auto;
+            margin-right: 0;
+            float: right;
+            padding-top: 15px;
+        }
 
-       table {
-           border-collapse: collapse;
-           margin: 25px 0;
-           font-size: 0.9em;
-           font-family: sans-serif;
-           min-width: 400px;
-           width: 100%;
-       }
+        .links a {
+            color: #fff;
+            padding-left: 2em;
+        }
 
-       table thead tr {
-           background-color: #404040;
-           color: #ffffff;
-           text-align: left;
-       }
+        main, .content {
+            max-width: 50em;
+            margin: 0 auto;
+            padding: 1em;
+        }
 
-       table th,
-       table td {
-           padding: 12px 15px;
-       }
+        .content {
 
-       table tbody tr {
-           border-bottom: 1px solid #dddddd;
-       }
+        }
+        h1, h1 code {
+            font-size: 1.5em;
+        }
+        h2 {
+            margin-top: 1em;
+            padding-top: 1em;
+            font-size: 1.2em;
+        }
 
-       table tbody tr:nth-of-type(even) {
-           background-color: #f3f3f3;
-       }
+        h1, h2, strong, h1 a {
+            color: #333;
+        }
 
-       table tbody tr:last-of-type {
-           border-bottom: 2px solid #404040;
-       }
-   </style>
+        code, pre {
+            background: #eee;
+        }
+
+        code {
+            padding: 2px 4px;
+            vertical-align: text-bottom;
+        }
+
+        pre {
+            padding: 1em;
+            display: block;
+            unicode-bidi: embed;
+            font-family: monospace;
+            white-space: pre;
+        }
+
+        pre, var {
+            font-weight: 500;
+        }
+
+        kbd {
+            background-color: #c0c0c0;
+            color: #000000;
+            margin-left: 0.5em;
+            padding: 5px;
+        }
+
+        ul.related {
+            padding-left: 0;
+            list-style: none;
+        }
+
+        ul.related li {
+            display: inline-block;
+            margin-right: 0.5rem;
+        }
+
+        var {
+            color: #404040;
+            margin-left: 0.5em;
+        }
+
+        .siginlinetype {
+            color: #a0a0a0;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin: 25px 0;
+            font-size: 0.9em;
+            font-family: sans-serif;
+            min-width: 400px;
+            width: 100%;
+        }
+
+        table thead tr {
+            background-color: #404040;
+            color: #ffffff;
+            text-align: left;
+        }
+
+        table th,
+        table td {
+            padding: 12px 15px;
+        }
+
+        table tbody tr {
+            border-bottom: 1px solid #dddddd;
+        }
+
+        table tbody tr:nth-of-type(even) {
+            background-color: #f3f3f3;
+        }
+
+        table tbody tr:last-of-type {
+            border-bottom: 2px solid #404040;
+        }
+        @page {
+            size: a4;
+            margin: 0;
+            @bottom-right {
+                 content: counter(page) '/' counter(pages);
+            }
+        }
+        @media print {
+            main, .content {
+                max-width: 100%;
+            }
+            * {
+                font-size: 12px;
+            }
+            h1, h1 code {
+                font-size: 16px;
+                 page-break-before : always;
+            }
+            h2 {
+                font-size: 14px;
+                page-break-after : avoid;
+            }
+        }
+    </style>
 </head>
 <body>
     <header>
