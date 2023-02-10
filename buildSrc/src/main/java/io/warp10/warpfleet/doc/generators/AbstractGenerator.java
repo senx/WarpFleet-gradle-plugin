@@ -37,6 +37,17 @@ public abstract class AbstractGenerator {
   }
 
   /**
+   * Sanitize string.
+   *
+   * @param str the str
+   * @return the string
+   */
+  public static String sanitize(String str) {
+    if(null == str) str = "";
+    return str.replaceAll("U+FF0E", ".");
+  }
+
+  /**
    * Output list.
    *
    * @param dest the dest
@@ -172,7 +183,7 @@ public abstract class AbstractGenerator {
     });
     return new JSONObject()
       .put("input", input)
-      .put(" output", output)
+      .put("output", output)
       .put("signatures", signatures);
   }
 }

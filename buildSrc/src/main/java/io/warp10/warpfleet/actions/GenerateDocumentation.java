@@ -18,6 +18,7 @@ package io.warp10.warpfleet.actions;
 
 import io.warp10.warpfleet.doc.generators.AbstractGenerator;
 import io.warp10.warpfleet.doc.generators.JSONGenerator;
+import io.warp10.warpfleet.doc.generators.MarkdownGenerator;
 import io.warp10.warpfleet.utils.Constants;
 import io.warp10.warpfleet.utils.Helper;
 import io.warp10.warpfleet.utils.Logger;
@@ -122,7 +123,7 @@ public class GenerateDocumentation extends DefaultTask {
           .getBody();
         JSONArray resArr = new JSONArray(res);
         JSONObject doc = resArr.length() > 0 ? resArr.getJSONObject(0) : new JSONObject();
-        f.put("result", doc).put("name", macro);
+        f.put("doc", doc).put("name", macro);
         fileListToProcess.add(f);
       } catch (IOException e) {
         Logger.messageError("Error, cannot read " + f.getString("fileObj"));
@@ -131,9 +132,11 @@ public class GenerateDocumentation extends DefaultTask {
     });
     AtomicReference<AbstractGenerator> generator = new AtomicReference<>();
     switch (this.getWfFormat()) {
-      case "json":
-        generator.set(new JSONGenerator());
+      case "md":
+      case "markdown":
+        generator.set(new MarkdownGenerator());
         break;
+      case "json":
       default:
         generator.set(new JSONGenerator());
         break;
