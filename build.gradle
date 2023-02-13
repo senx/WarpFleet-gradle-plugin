@@ -1,4 +1,8 @@
 plugins {
     id 'io.warp10.warpfleet-gradle-plugin' // version '1.0-SNAPSHOT'
-    id 'java'
+}
+
+warpfleet {
+    group = 'io.warp10'
+    artifact = 'warp10-ext-barcode'
 }

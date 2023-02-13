@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.Objects;
 
+import static org.gradle.testkit.runner.TaskOutcome.FAILED;
 import static org.gradle.testkit.runner.TaskOutcome.SUCCESS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -66,7 +67,7 @@ public class TestGetArtifacts extends AbstractTests {
   public void testWfGetArtifactsWithGroup() throws IOException {
     String buildFileContent = "plugins { id \"io.warp10.warpfleet-gradle-plugin\" }\n"
       + "warpfleet {\n"
-      + "  group 'io.warp10'\n" +
+      + "  group = 'io.warp10'\n" +
       "}\n";
     writeFile(buildFile, buildFileContent);
 
@@ -80,5 +81,23 @@ public class TestGetArtifacts extends AbstractTests {
     assertTrue(result.getOutput().contains("io.warp10:warp10-ext-s3"));
     assertFalse(result.getOutput().contains("io.senx:warp10-ext-web3"));
     assertEquals(SUCCESS, Objects.requireNonNull(result.task(":wfGetArtifacts")).getOutcome());
+  }
+  @Test
+  @DisplayName("wfGetArtifacts with a non existing group")
+  public void testWfGetArtifactsNonExistingGroup() throws IOException {
+    String buildFileContent = "plugins { id \"io.warp10.warpfleet-gradle-plugin\" }\n" +
+       "warpfleet {\n" +
+       "  group = 'dummy'\n" +
+      "}\n";
+    writeFile(buildFile, buildFileContent);
+
+    BuildResult result = GradleRunner.create()
+      .withPluginClasspath()
+      .withProjectDir(testProjectDir)
+      .withTestKitDir(testProjectDir)
+      .withArguments("wfGetArtifacts")
+      .buildAndFail();
+
+    assertEquals(FAILED, Objects.requireNonNull(result.task(":wfGetArtifacts")).getOutcome());
   }
 }

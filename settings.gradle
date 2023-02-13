@@ -8,6 +8,7 @@
  */
 
 pluginManagement {
+  includeBuild "warpfleet-gradle-plugin"
   repositories {
     mavenLocal()
     gradlePluginPortal()
