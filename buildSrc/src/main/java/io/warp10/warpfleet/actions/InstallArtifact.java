@@ -26,6 +26,7 @@ import kong.unirest.json.JSONObject;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.gradle.api.DefaultTask;
+import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.TaskAction;
@@ -46,49 +47,76 @@ import java.util.stream.Collectors;
 /**
  * The type Install artifact.
  */
-@SuppressWarnings("unused")
-public class InstallArtifact extends DefaultTask {
+abstract public class InstallArtifact extends DefaultTask {
   /**
-   * The Wf group.
+   * Gets wf group.
+   *
+   * @return the wf group
    */
   @Input
   @Optional
-  String wfGroup;
+  @Option(option = "group", description = "Artifact's group, ie: io.warp10")
+  abstract public Property<String> getWfGroup();
+
   /**
-   * The Wf artifact.
+   * Gets wf artifact.
+   *
+   * @return the wf artifact
    */
   @Input
   @Optional
-  String wfArtifact;
+  @Option(option = "artifact", description = "Artifact's name, ie: warp10-plugin-mqtt")
+  abstract public Property<String> getWfArtifact();
+
   /**
-   * The Wf version.
+   * Gets wf version.
+   *
+   * @return the wf version
    */
   @Input
   @Optional
-  String wfVersion;
+  @Option(option = "vers", description = "Artifact's version, ie: 0.0.3")
+  abstract public Property<String> getWfVersion();
+
   /**
-   * The Wf classifier.
+   * Gets warp 10 dir.
+   *
+   * @return the warp 10 dir
+   */
+  @Input
+  @Option(option = "dest", description = "Warp 10 root installation directory, ie: /opt/warp10")
+  abstract public Property<String> getWarp10Dir();
+
+  /**
+   * Gets wf packages.
+   *
+   * @return the wf packages
    */
   @Input
   @Optional
-  String wfClassifier;
+  @Option(option = "packages", description = "Coma separated list of packages to install")
+  abstract public Property<String> getWfPackages();
+
+
   /**
-   * The Wf packages.
+   * Gets wf classifier.
+   *
+   * @return the wf classifier
    */
   @Input
   @Optional
-  String wfPackages;
+  @Option(option = "classifier", description = "Artifact's classifier, ie: uberjar")
+  abstract public Property<String> getWfClassifier();
+
   /**
-   * The Warp 10 dir.
-   */
-  @Input
-  String warp10Dir;
-  /**
-   * The Wf repo url.
+   * Gets wf repo url.
+   *
+   * @return the wf repo url
    */
   @Input
   @Optional
-  String wfRepoURL;
+  @Option(option = "repoURL", description = "Artifact's maven like repo url")
+  abstract public Property<String> getWfRepoURL();
 
   /**
    * Instantiates a new Install artifact.
@@ -104,10 +132,11 @@ public class InstallArtifact extends DefaultTask {
   @TaskAction
   public void installArtifact() {
     List<PackageInfo> packages = new ArrayList<>();
+
     try {
       // Test inputs
-      if (!StringUtils.isBlank(wfPackages) && !"unspecified".equals(this.wfPackages)) {
-        packages = Arrays.stream(wfPackages.split(",")).map(p -> {
+      if (!StringUtils.isBlank(this.getWfPackages().getOrNull()) && !"unspecified".equals(this.getWfPackages().getOrNull())) {
+        packages = Arrays.stream(this.getWfPackages().get().split(",")).map(p -> {
           String[] parts = p.split(":");
           if (parts.length < 2) {
             Logger.messageError("Wrong syntax for :" + p);
@@ -136,36 +165,36 @@ public class InstallArtifact extends DefaultTask {
           return packageInfo;
         }).collect(Collectors.toList());
       } else {
-        if (StringUtils.isBlank(this.wfVersion) || "unspecified".equals(this.wfVersion) || "latest".equals(this.wfVersion)) {
-          this.wfVersion = Helper.getLatest(this.wfGroup, this.wfArtifact).getJSONObject("latest").getString("version");
+        if (StringUtils.isBlank(this.getWfVersion().getOrNull()) || "unspecified".equals(this.getWfVersion().getOrNull()) || "latest".equals(this.getWfVersion().getOrNull())) {
+          this.getWfVersion().set(Helper.getLatest(this.getWfGroup().get(), this.getWfArtifact().get()).getJSONObject("latest").getString("version"));
         }
-        if (StringUtils.isBlank(this.wfGroup) || "unspecified".equals(this.wfGroup)) {
+        if (StringUtils.isBlank(this.getWfGroup().getOrNull()) || "unspecified".equals(this.getWfGroup().getOrNull())) {
           Logger.messageError("Artifact's group is mandatory");
           return;
         }
-        if (StringUtils.isBlank(this.wfArtifact) || "unspecified".equals(this.wfArtifact)) {
+        if (StringUtils.isBlank(this.getWfArtifact().getOrNull()) || "unspecified".equals(this.getWfArtifact().getOrNull())) {
           Logger.messageError("Artifact's name is mandatory");
           return;
         }
-        if (StringUtils.isBlank(this.warp10Dir) || "unspecified".equals(this.warp10Dir)) {
+        if (StringUtils.isBlank(this.getWarp10Dir().getOrNull()) || "unspecified".equals(this.getWarp10Dir().getOrNull())) {
           Logger.messageError("Warp 10 root directory is mandatory");
           return;
         }
-        if (StringUtils.isBlank(this.wfClassifier) || "unspecified".equals(this.wfClassifier)) {
-          this.wfClassifier = null;
+        if (StringUtils.isBlank(this.getWfClassifier().getOrNull()) || "unspecified".equals(this.getWfClassifier().getOrNull())) {
+          this.getWfClassifier().set((String) null);
         }
-        packages.add(new PackageInfo(this.wfGroup, this.wfArtifact, this.wfVersion, this.wfClassifier));
+        packages.add(new PackageInfo(this.getWfGroup().get(), this.getWfArtifact().get(), this.getWfVersion().get(), this.getWfClassifier().getOrNull()));
       }
       // process packages
       for (PackageInfo pi : packages) {
         Logger.messageInfo("Retrieving " + pi + " info");
         JSONObject info = Helper.getArtifactInfo(pi);
-        Logger.messageInfo("Installing " + pi + " into: " + this.warp10Dir);
+        Logger.messageInfo("Installing " + pi + " into: " + this.getWarp10Dir().get());
 
         if (null != info.getJSONArray("macros")) {
           info.getJSONArray("macros").forEach(m -> {
             try {
-              Helper.getMacro(this.wfGroup, this.wfArtifact, this.wfVersion, (JSONObject) m, this.warp10Dir);
+              Helper.getMacro(this.getWfGroup().get(), this.getWfArtifact().get(), this.getWfVersion().get(), (JSONObject) m, this.getWarp10Dir().get());
             } catch (IOException e) {
               throw new RuntimeException(e);
             }
@@ -198,8 +227,8 @@ public class InstallArtifact extends DefaultTask {
         // Building custom gradle file
         Logger.messageInfo("Calculating dependencies");
         String repoURL = info.getString("repoUrl");
-        if (!StringUtils.isBlank(this.wfRepoURL) && !"unspecified".equals(this.wfRepoURL)) {
-          repoURL = this.wfRepoURL;
+        if (!StringUtils.isBlank(this.getWfRepoURL().getOrNull()) && !"unspecified".equals(this.getWfRepoURL().getOrNull())) {
+          repoURL = this.getWfRepoURL().get();
         }
         StringBuilder gradle = new StringBuilder()
           .append("plugins { id 'java' }\n")
@@ -237,13 +266,13 @@ public class InstallArtifact extends DefaultTask {
         List<File> jarList = Arrays.stream(Objects.requireNonNull(depsDir.listFiles()))
           .filter(f -> f.getName().endsWith(".jar")).collect(Collectors.toList());
         for (File f : jarList) {
-          FileUtils.copyFile(f, Helper.filePath(this.warp10Dir, "lib", f.getName()));
+          FileUtils.copyFile(f, Helper.filePath(this.getWarp10Dir().get(), "lib", f.getName()));
           Logger.messageSusccess("Dependency: " + f.getName() + " successfully deployed");
         }
 
         // Process conf entries
         Logger.messageInfo("Calculating properties");
-        File propertyFile = Helper.filePath(this.warp10Dir, "etc", "conf.d", "99-" + pi.getGroup() + "-" + pi.getName() + ".conf");
+        File propertyFile = Helper.filePath(this.getWarp10Dir().get(), "etc", "conf.d", "99-" + pi.getGroup() + "-" + pi.getName() + ".conf");
         Properties props = new Properties();
         if (propertyFile.exists()) {
           Logger.messageWarning(propertyFile.getAbsolutePath() + " already exists, will backup it");
@@ -290,138 +319,5 @@ public class InstallArtifact extends DefaultTask {
     } catch (Throwable e) {
       Logger.messageError(e.getMessage());
     }
-  }
-
-  /**
-   * Gets wf group.
-   *
-   * @return the wf group
-   */
-  public String getWfGroup() {
-    return wfGroup;
-  }
-
-  /**
-   * Sets wf group.
-   *
-   * @param wfGroup the wf group
-   */
-  @Option(option = "group", description = "Artifact's group, ie: io.warp10")
-  public void setWfGroup(String wfGroup) {
-    this.wfGroup = wfGroup;
-  }
-
-  /**
-   * Gets wf artifact.
-   *
-   * @return the wf artifact
-   */
-  public String getWfArtifact() {
-    return wfArtifact;
-  }
-
-  /**
-   * Sets wf artifact.
-   *
-   * @param wfArtifact the wf artifact
-   */
-  @Option(option = "artifact", description = "Artifact's name, ie: warp10-plugin-mqtt")
-  public void setWfArtifact(String wfArtifact) {
-    this.wfArtifact = wfArtifact;
-  }
-
-  /**
-   * Gets wf version.
-   *
-   * @return the wf version
-   */
-  public String getWfVersion() {
-    return wfVersion;
-  }
-
-  /**
-   * Sets wf version.
-   *
-   * @param wfVersion the wf version
-   */
-  @Option(option = "vers", description = "Artifact's version, ie: 0.0.3")
-  public void setWfVersion(String wfVersion) {
-    this.wfVersion = wfVersion;
-  }
-
-  /**
-   * Gets warp 10 dir.
-   *
-   * @return the warp 10 dir
-   */
-  public String getWarp10Dir() {
-    return warp10Dir;
-  }
-
-  /**
-   * Sets warp 10 dir.
-   *
-   * @param warp10Dir the warp 10 dir
-   */
-  @Option(option = "dest", description = "Warp 10 root installation directory, ie: /opt/warp10")
-  public void setWarp10Dir(String warp10Dir) {
-    this.warp10Dir = warp10Dir;
-  }
-
-  /**
-   * Gets wf packages.
-   *
-   * @return the wf packages
-   */
-  public String getWfPackages() {
-    return wfPackages;
-  }
-
-  /**
-   * Sets wf packages.
-   *
-   * @param wfPackages the wf packages
-   */
-  @Option(option = "packages", description = "Coma separated list of packages to install")
-  public void setWfPackages(String wfPackages) {
-    this.wfPackages = wfPackages;
-  }
-
-  /**
-   * Gets wf classifier.
-   *
-   * @return the wf classifier
-   */
-  public String getWfClassifier() {
-    return wfClassifier;
-  }
-
-  /**
-   * Sets wf classifier.
-   *
-   * @param wfClassifier the wf classifier
-   */
-  @Option(option = "classifier", description = "Artifact's classifier, ie: uberjar")
-  public void setWfClassifier(String wfClassifier) {
-    this.wfClassifier = wfClassifier;
-  }
-
-  /**
-   * Gets wf repo url.
-   *
-   * @return the wf repo url
-   */
-  public String getWfRepoURL() {
-    return wfRepoURL;
-  }
-
-  /**
-   * Sets wf repo url.
-   *
-   * @param wfRepoURL the wf repo url
-   */
-  @Option(option = "repoURL", description = "Artifact's maven like repo url")
-  public void setWfRepoURL(String wfRepoURL) {
-    this.wfRepoURL = wfRepoURL;
   }
 }

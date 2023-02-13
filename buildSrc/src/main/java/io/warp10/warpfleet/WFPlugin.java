@@ -38,11 +38,34 @@ public class WFPlugin implements Plugin<Project> {
   }
 
   public void apply(Project project) {
-    project.getTasks().register("wgGetArtifactInfo", GetArtifactInfo.class);
-    project.getTasks().register("wfGetArtifacts", GetArtifacts.class);
+    // DSL Extension
+    WarpFleetExtension ext = project.getExtensions().create("warpfleet", WarpFleetExtension.class);
+    // Tasks
     project.getTasks().register("wfGetGroups", GetGroups.class);
-    project.getTasks().register("wfGetVersions", GetVersions.class);
-    project.getTasks().register("wfInstall", InstallArtifact.class);
+
+    project.getTasks().register("wfGetArtifacts", GetArtifacts.class, t -> t.getWFGroup().set(ext.getGroup()));
+
+    project.getTasks().register("wfGetVersions", GetVersions.class, t-> {
+      t.getWFGroup().set(ext.getGroup());
+      t.getWFArtifact().set(ext.getArtifact());
+    });
+
+    project.getTasks().register("wgGetArtifactInfo", GetArtifactInfo.class, t-> {
+      t.getWFGroup().set(ext.getGroup());
+      t.getWFArtifact().set(ext.getArtifact());
+      t.getWFVersion().set(ext.getVers());
+    });
+
+    project.getTasks().register("wfInstall", InstallArtifact.class, t-> {
+      t.getWfPackages().set(ext.getPackages());
+      t.getWfRepoURL().set(ext.getRepoURL());
+      t.getWfClassifier().set(ext.getClassifier());
+      t.getWfVersion().set(ext.getVers());
+      t.getWfArtifact().set(ext.getArtifact());
+      t.getWfGroup().set(ext.getGroup());
+      t.getWarp10Dir().set(ext.getWarp10Dir());
+    });
+
     project.getTasks().register("wfDoc", GenerateDocumentation.class);
   }
 }

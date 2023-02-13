@@ -20,6 +20,7 @@ import io.warp10.warpfleet.utils.Constants;
 import io.warp10.warpfleet.utils.Helper;
 import kong.unirest.json.JSONObject;
 import org.gradle.api.DefaultTask;
+import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.TaskAction;
@@ -28,24 +29,34 @@ import org.gradle.api.tasks.options.Option;
 /**
  * The type Get artifact info.
  */
-@SuppressWarnings("unused")
-public class GetArtifactInfo extends DefaultTask {
+public abstract class GetArtifactInfo extends DefaultTask {
   /**
-   * The Wf group.
+   * Gets wf group.
+   *
+   * @return the wf group
    */
   @Input
-  String wfGroup;
+  @Option(option = "group", description = "Artifact's group, ie: io.warp10")
+  abstract public Property<String> getWFGroup();
+
   /**
-   * The Wf artifact.
+   * Gets wf artifact.
+   *
+   * @return the wf artifact
    */
   @Input
-  String wfArtifact;
+  @Option(option = "artifact", description = "Artifact's name, ie: warp10-plugin-mqtt")
+  abstract public Property<String> getWFArtifact();
+
   /**
    * The Wf version.
+   *
+   * @return the wf version
    */
   @Input
   @Optional
-  String wfVersion;
+  @Option(option = "vers", description = "Artifact's version, ie: 0.0.3")
+  abstract public Property<String> getWFVersion();
 
   /**
    * Instantiates a new Get artifact info.
@@ -60,71 +71,14 @@ public class GetArtifactInfo extends DefaultTask {
    */
   @TaskAction
   public void getArtifactInfo() {
-    if (null == this.wfVersion || "unspecified".equals(this.wfVersion) || "latest".equals(this.wfVersion)) {
-      this.wfVersion = Helper.getLatest(this.wfGroup, this.wfArtifact).getJSONObject("latest").getString("version");
+    if (null == this.getWFVersion().getOrNull() || "unspecified".equals(this.getWFVersion().getOrNull()) || "latest".equals(this.getWFVersion().getOrNull())) {
+      this.getWFVersion().set(Helper.getLatest(this.getWFGroup().get(), this.getWFArtifact().get()).getJSONObject("latest").getString("version"));
     }
-    JSONObject info = Helper.getArtifactInfo(this.wfGroup, this.wfArtifact, this.wfVersion);
+    JSONObject info = Helper.getArtifactInfo(this.getWFGroup().get(), this.getWFArtifact().get(), this.getWFVersion().get());
     System.out.printf("- %s:%s:%s (%s)\n",
-        info.getString("group"),
-        info.getString("artifact"),
-        info.getString("version"),
-        info.getString("description"));
-  }
-
-  /**
-   * Gets wfGroup.
-   *
-   * @return the wfGroup
-   */
-  public String getWfGroup() {
-    return wfGroup;
-  }
-
-  /**
-   * Sets wfGroup.
-   *
-   * @param wfGroup the wfGroup
-   */
-  @Option(option = "group", description = "Artifact's group, ie: io.warp10")
-  public void setWfGroup(String wfGroup) {
-    this.wfGroup = wfGroup;
-  }
-
-  /**
-   * Gets wf artifact.
-   *
-   * @return the wf artifact
-   */
-  public String getWfArtifact() {
-    return wfArtifact;
-  }
-
-  /**
-   * Sets wf artifact.
-   *
-   * @param wfArtifact the wf artifact
-   */
-  @Option(option = "artifact", description = "Artifact's name, ie: warp10-plugin-mqtt")
-  public void setWfArtifact(String wfArtifact) {
-    this.wfArtifact = wfArtifact;
-  }
-
-  /**
-   * Gets wf version.
-   *
-   * @return the wf version
-   */
-  public String getWfVersion() {
-    return wfVersion;
-  }
-
-  /**
-   * Sets wf version.
-   *
-   * @param wfVersion the wf version
-   */
-  @Option(option = "vers", description = "Artifact's version, ie: 0.0.3")
-  public void setWfVersion(String wfVersion) {
-    this.wfVersion = wfVersion;
+      info.getString("group"),
+      info.getString("artifact"),
+      info.getString("version"),
+      info.getString("description"));
   }
 }

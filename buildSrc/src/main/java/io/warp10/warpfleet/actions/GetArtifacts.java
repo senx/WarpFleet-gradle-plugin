@@ -21,6 +21,7 @@ import io.warp10.warpfleet.utils.Helper;
 import kong.unirest.json.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.gradle.api.DefaultTask;
+import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.TaskAction;
@@ -32,14 +33,16 @@ import java.util.List;
 /**
  * The type Get artifacts.
  */
-@SuppressWarnings("unused")
-public class GetArtifacts extends DefaultTask {
+public abstract class GetArtifacts extends DefaultTask {
   /**
-   * The Wf group.
+   * Gets wf group.
+   *
+   * @return the wf group
    */
   @Input
   @Optional
-  String wfGroup;
+  @Option(option = "group", description = "Artifact's group, ie: io.warp10")
+  abstract public Property<String> getWFGroup();
 
   /**
    * Instantiates a new Get artifacts.
@@ -55,40 +58,21 @@ public class GetArtifacts extends DefaultTask {
   @TaskAction
   public void getArtifacts() {
     List<String> groups = new ArrayList<>();
-    if (StringUtils.isBlank(this.wfGroup)) {
+    if (StringUtils.isBlank(this.getWFGroup().getOrNull())) {
       Helper.getGroups().forEach(g -> groups.add(((JSONObject) g).getString("name")));
     } else {
-      groups.add(this.wfGroup.trim());
+      groups.add(this.getWFGroup().get().trim());
     }
     groups.forEach(g -> Helper.getArtifacts(g).forEach(item -> {
       JSONObject repo = (JSONObject) item;
       JSONObject latest = repo.optJSONObject("latest");
       if (null != latest) {
         System.out.printf("- %s:%s:%s (%s)\n",
-            latest.getString("group"),
-            latest.getString("artifact"),
-            latest.getString("version"),
-            latest.getString("description"));
+          latest.getString("group"),
+          latest.getString("artifact"),
+          latest.getString("version"),
+          latest.getString("description"));
       }
     }));
-  }
-
-  /**
-   * Gets wf group.
-   *
-   * @return the wf group
-   */
-  public String getWfGroup() {
-    return wfGroup;
-  }
-
-  /**
-   * Sets wf group.
-   *
-   * @param wfGroup the wf group
-   */
-  @Option(option = "group", description = "Artifact's group, ie: io.warp10")
-  public void setWfGroup(String wfGroup) {
-    this.wfGroup = wfGroup;
   }
 }

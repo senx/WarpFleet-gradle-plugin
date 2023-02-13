@@ -25,7 +25,6 @@ import org.gradle.api.tasks.TaskAction;
 /**
  * The type Get groups.
  */
-@SuppressWarnings("unused")
 public class GetGroups extends DefaultTask {
 
   /**

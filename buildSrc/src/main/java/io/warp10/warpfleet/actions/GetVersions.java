@@ -20,6 +20,7 @@ import io.warp10.warpfleet.utils.Constants;
 import io.warp10.warpfleet.utils.Helper;
 import kong.unirest.json.JSONObject;
 import org.gradle.api.DefaultTask;
+import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.options.Option;
@@ -27,18 +28,24 @@ import org.gradle.api.tasks.options.Option;
 /**
  * The type Get versions.
  */
-@SuppressWarnings("unused")
-public class GetVersions extends DefaultTask {
+abstract public class GetVersions extends DefaultTask {
   /**
-   * The Wf group.
+   * Gets wf group.
+   *
+   * @return the wf group
    */
   @Input
-  String wfGroup;
+  @Option(option = "group", description = "Artifact's group, ie: io.warp10")
+  abstract public Property<String> getWFGroup();
+
   /**
-   * The Wf artifact.
+   * Gets wf artifact.
+   *
+   * @return the wf artifact
    */
   @Input
-  String wfArtifact;
+  @Option(option = "artifact", description = "Artifact's name, ie: warp10-plugin-mqtt")
+  abstract public Property<String> getWFArtifact();
 
   /**
    * Instantiates a new Get versions.
@@ -53,10 +60,10 @@ public class GetVersions extends DefaultTask {
    */
   @TaskAction
   public void getVersions() {
-    JSONObject versions = Helper.getVersions(this.wfGroup, this.wfArtifact);
+    JSONObject versions = Helper.getVersions(this.getWFGroup().get(), this.getWFArtifact().get());
     System.out.printf("- Name:            %s:%s\n",
-        versions.getJSONObject("latest").getString("group"),
-        versions.getJSONObject("latest").getString("artifact")
+      versions.getJSONObject("latest").getString("group"),
+      versions.getJSONObject("latest").getString("artifact")
     );
     System.out.printf("- Description:     %s\n", versions.getJSONObject("latest").getString("description"));
     System.out.printf("- Latest version:  %s\n", versions.getJSONObject("latest").getString("version"));
@@ -65,43 +72,5 @@ public class GetVersions extends DefaultTask {
       JSONObject repo = (JSONObject) item;
       System.out.printf("    - %s\n", repo.getString("name"));
     });
-  }
-
-  /**
-   * Gets wf group.
-   *
-   * @return the wf group
-   */
-  public String getWfGroup() {
-    return wfGroup;
-  }
-
-  /**
-   * Sets wf group.
-   *
-   * @param wfGroup the wf group
-   */
-  @Option(option = "group", description = "Artifact's group, ie: io.warp10")
-  public void setWfGroup(String wfGroup) {
-    this.wfGroup = wfGroup;
-  }
-
-  /**
-   * Gets wf artifact.
-   *
-   * @return the wf artifact
-   */
-  public String getWfArtifact() {
-    return wfArtifact;
-  }
-
-  /**
-   * Sets wf artifact.
-   *
-   * @param wfArtifact the wf artifact
-   */
-  @Option(option = "artifact", description = "Artifact's name, ie: warp10-plugin-mqtt")
-  public void setWfArtifact(String wfArtifact) {
-    this.wfArtifact = wfArtifact;
   }
 }
