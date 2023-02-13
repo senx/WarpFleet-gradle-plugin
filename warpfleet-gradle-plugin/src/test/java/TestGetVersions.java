@@ -25,7 +25,6 @@ import java.util.Objects;
 import static org.gradle.testkit.runner.TaskOutcome.FAILED;
 import static org.gradle.testkit.runner.TaskOutcome.SUCCESS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TestGetVersions extends AbstractTests {
@@ -51,6 +50,7 @@ public class TestGetVersions extends AbstractTests {
     assertTrue(result.getOutput().contains("io.warp10:warp10-ext-barcode"));
     assertEquals(SUCCESS, Objects.requireNonNull(result.task(":wfGetVersions")).getOutcome());
   }
+
   @Test
   @DisplayName("wfGetVersions with group, artifact and latest as version")
   public void testWfGetVersionsLatest() throws IOException {
@@ -58,7 +58,7 @@ public class TestGetVersions extends AbstractTests {
       "warpfleet {\n" +
       "  group = 'io.warp10'\n" +
       "  artifact = 'warp10-ext-barcode'\n" +
-      "  vers = 'latest'\n"+
+      "  vers = 'latest'\n" +
       "}\n";
     writeFile(buildFile, buildFileContent);
 
@@ -71,6 +71,30 @@ public class TestGetVersions extends AbstractTests {
 
     assertTrue(result.getOutput().contains("- Latest version:"));
     assertTrue(result.getOutput().contains("io.warp10:warp10-ext-barcode"));
+    assertEquals(SUCCESS, Objects.requireNonNull(result.task(":wfGetVersions")).getOutcome());
+  }
+
+  @Test
+  @DisplayName("wfGetVersions with group, artifact and a specific version")
+  public void testWfGetVersionsWSpecificVersion() throws IOException {
+    String buildFileContent = "plugins { id \"io.warp10.warpfleet-gradle-plugin\" }\n" +
+      "warpfleet {\n" +
+      "  group = 'io.warp10'\n" +
+      "  artifact = 'warp10-ext-barcode'\n" +
+      "  vers = '1.0.2-uberjar'\n" +
+      "}\n";
+    writeFile(buildFile, buildFileContent);
+
+    BuildResult result = GradleRunner.create()
+      .withPluginClasspath()
+      .withProjectDir(testProjectDir)
+      .withTestKitDir(testProjectDir)
+      .withArguments("wfGetVersions")
+      .build();
+
+    assertTrue(result.getOutput().contains("- Latest version:"));
+    assertTrue(result.getOutput().contains("io.warp10:warp10-ext-barcode"));
+    assertTrue(result.getOutput().contains("1.0.2-uberjar"));
     assertEquals(SUCCESS, Objects.requireNonNull(result.task(":wfGetVersions")).getOutcome());
   }
 
