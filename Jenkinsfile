@@ -56,14 +56,24 @@ pipeline {
 
     stage('Build') {
       steps {
-        sh "(cd ./buildSrc && ${GRADLE_CMD} clean build)"
+        sh "${GRADLE_CMD} -p warpfleet-gradle-plugin clean build -x test"
+      }
+    }
+
+    stage('Test') {
+      steps {
+        sh "${GRADLE_CMD} -p warpfleet-gradle-plugin test jacocoTestReport"
+        junit keepLongStdio: true, testResults: 'warpfleet-gradle-plugin/build/test-results/test/*.xml'
+        publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'warpfleet-gradle-plugin/build/jacocoHtml', reportFiles: 'index.html', reportName: 'Jacoco Report', reportTitles: 'Jacoco'])
+        jacoco exclusionPattern: '**/*Test*.class', execPattern: 'warpfleet-gradle-plugin/build/jacoco/test.exec', inclusionPattern: '**/*.class', skipCopyOfSrcFiles: true
+        chuckNorris()
       }
     }
 
     stage('Package') {
       steps {
-        sh "(cd ./buildSrc && ${GRADLE_CMD} jar)"
-        archiveArtifacts "buildSrc/build/libs/*.jar"
+        sh "${GRADLE_CMD} -p warpfleet-gradle-plugin jar -x test"
+        archiveArtifacts "warpfleet-gradle-plugin/build/libs/*.jar"
       }
     }
 
@@ -75,7 +85,7 @@ pipeline {
         message "Should we deploy libs?"
       }
       steps {
-        sh "(cd ./buildSrc && ${GRADLE_CMD} clean jar sourcesJar javadocJar publishMavenPublicationToNexusRepository -x test)"
+        sh "${GRADLE_CMD} -p warpfleet-gradle-plugin clean jar sourcesJar javadocJar publishMavenPublicationToNexusRepository -x test"
       }
     }
 
@@ -92,9 +102,9 @@ pipeline {
             message 'Should we deploy to Maven Central?'
           }
           steps {
-            sh "(cd ./buildSrc && ${GRADLE_CMD} clean jar sourcesJar javadocJar publishMavenPublicationToMavenRepository -x test -x shadowJar)"
-            sh "(cd ./buildSrc && ${GRADLE_CMD} closeRepository)"
-            sh "(cd ./buildSrc && ${GRADLE_CMD} releaseRepository)"
+            sh "${GRADLE_CMD} -p warpfleet-gradle-plugin clean jar sourcesJar javadocJar publishMavenPublicationToMavenRepository -x test -x shadowJar"
+            sh "${GRADLE_CMD} -p warpfleet-gradle-plugin closeRepository"
+            sh "${GRADLE_CMD} -p warpfleet-gradle-plugin releaseRepository"
             script {
               notify.slack('PUBLISHED')
             }

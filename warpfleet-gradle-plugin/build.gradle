@@ -1,15 +1,17 @@
 plugins {
     id 'java'
     id 'idea'
+    id 'jacoco'
     id 'eclipse'
     id 'maven-publish'
     id 'java-gradle-plugin'
     id 'signing'
     id 'net.nemerosa.versioning' version "2.15.1"
     id 'io.codearte.nexus-staging' version "0.30.0"
+
 }
 versioning {
-    gitRepoRootDir = '../'
+    gitRepoRootDir = '.'
 }
 
 println versioning.info.full
@@ -18,7 +20,7 @@ targetCompatibility = 1.8
 project.group 'io.warp10'
 project.version '1.0-SNAPSHOT'
 project.description = 'WarpFleet Gradle Plugin'
-project.version = versioning.info.lastTag + ((versioning.info.tag != null) ? '' : '-' + versioning.info.build)
+project.version = (versioning.info.lastTag != null ? versioning.info.lastTag : versioning.info.build)
 
 java {
     withJavadocJar()
@@ -35,6 +37,15 @@ configurations {
 sourceSets {
     main {
         compileClasspath = compileClasspath + configurations.provided
+    }
+}
+
+jacocoTestReport {
+    reports {
+        xml.required = false
+        csv.required = false
+        html.required = true
+        html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
     }
 }
 
