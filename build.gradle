@@ -1,14 +1,3 @@
 plugins {
-  id 'java'
-  id 'idea'
-  id 'eclipse'
   id 'io.warp10.warpfleet-gradle-plugin' // version '1.0-SNAPSHOT'
 }
-
-java {
-  toolchain {
-    languageVersion = JavaLanguageVersion.of(18)
-  }
-}
-sourceCompatibility = 1.8
-targetCompatibility = 1.8

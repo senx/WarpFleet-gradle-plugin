@@ -13,15 +13,14 @@ versioning {
 }
 
 println versioning.info.full
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 project.group 'io.warp10'
 project.version '1.0-SNAPSHOT'
 project.description = 'WarpFleet Gradle Plugin'
 project.version = versioning.info.lastTag + ((versioning.info.tag != null) ? '' : '-' + versioning.info.build)
 
 java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(18)
-    }
     withJavadocJar()
     withSourcesJar()
 }
