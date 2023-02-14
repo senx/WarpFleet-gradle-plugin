@@ -37,6 +37,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -147,6 +149,8 @@ public class HTMLGenerator extends MarkdownGenerator {
       Logger.messageError("Error, cannot read html.tpl ");
       throw new RuntimeException(e);
     }
-    return tpl.replaceAll("\\{\\{title}}", title).replaceAll("\\{\\{content}}", html);
+    return tpl
+      .replaceAll(Pattern.quote("{{title}}"), Matcher.quoteReplacement(title))
+      .replaceAll(Pattern.quote("{{content}}"), Matcher.quoteReplacement(html));
   }
 }

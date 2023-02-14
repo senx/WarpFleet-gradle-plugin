@@ -197,6 +197,9 @@ public class MarkdownGenerator extends AbstractGenerator {
     if (null == related) return "";
     StringBuilder md = new StringBuilder().append("## See also\n\n");
     related.forEach(r -> {
+      if(r instanceof String) {
+        r = new JSONObject().put("b64", r).put("label", r);
+      }
       JSONObject rel = (JSONObject) r;
       md
         .append("- [./")

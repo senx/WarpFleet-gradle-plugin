@@ -28,11 +28,22 @@ import static org.gradle.testkit.runner.TaskOutcome.SUCCESS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * The type Test get artifact info.
+ */
 public class TestGetArtifactInfo extends AbstractTests {
-  public static final String TASK = "wgGetArtifactInfo";
+  /**
+   * The constant TASK.
+   */
+  public static final String TASK = "wfGetArtifactInfo";
 
+  /**
+   * Test get artifact info.
+   *
+   * @throws IOException the io exception
+   */
   @Test
-  @DisplayName("wgGetArtifactInfo with group and artifact")
+  @DisplayName("wfGetArtifactInfo with group and artifact")
   public void testGetArtifactInfo() throws IOException {
     BuildResult result = this.build(getParamsMap(
       "group", "io.warp10",
@@ -41,8 +52,14 @@ public class TestGetArtifactInfo extends AbstractTests {
     assertTrue(result.getOutput().contains("io.warp10:warp10-ext-barcode"));
     assertEquals(SUCCESS, Objects.requireNonNull(result.task(":" + TASK)).getOutcome());
   }
+
+  /**
+   * Test get latest artifact info.
+   *
+   * @throws IOException the io exception
+   */
   @Test
-  @DisplayName("wgGetArtifactInfo with group, artifact and latest as version")
+  @DisplayName("wfGetArtifactInfo with group, artifact and latest as version")
   public void testGetLatestArtifactInfo() throws IOException {
     BuildResult result = this.build(getParamsMap(
       "group", "io.warp10",
@@ -52,8 +69,14 @@ public class TestGetArtifactInfo extends AbstractTests {
     assertTrue(result.getOutput().contains("io.warp10:warp10-ext-barcode"));
     assertEquals(SUCCESS, Objects.requireNonNull(result.task(":" + TASK)).getOutcome());
   }
+
+  /**
+   * Test get specific artifact info.
+   *
+   * @throws IOException the io exception
+   */
   @Test
-  @DisplayName("wgGetArtifactInfo with group, artifact and version")
+  @DisplayName("wfGetArtifactInfo with group, artifact and version")
   public void testGetSpecificArtifactInfo() throws IOException {
     BuildResult result = this.build(getParamsMap(
       "group", "io.warp10",
@@ -64,15 +87,25 @@ public class TestGetArtifactInfo extends AbstractTests {
     assertEquals(SUCCESS, Objects.requireNonNull(result.task(":" + TASK)).getOutcome());
   }
 
+  /**
+   * Test get artifact info wo group and artifact.
+   *
+   * @throws IOException the io exception
+   */
   @Test
-  @DisplayName("wgGetArtifactInfo without group and artifact")
+  @DisplayName("wfGetArtifactInfo without group and artifact")
   public void testGetArtifactInfoWOGroupAndArtifact() throws IOException {
     BuildResult result = this.buildAndFail(getParamsMap(), TASK);
     assertEquals(FAILED, Objects.requireNonNull(result.task(":" + TASK)).getOutcome());
   }
 
+  /**
+   * Test get artifact info wo artifact.
+   *
+   * @throws IOException the io exception
+   */
   @Test
-  @DisplayName("wgGetArtifactInfo without artifact")
+  @DisplayName("wfGetArtifactInfo without artifact")
   public void testGetArtifactInfoWOArtifact() throws IOException {
     BuildResult result = this.buildAndFail(getParamsMap(
       "group", "io.warp10"
@@ -80,8 +113,13 @@ public class TestGetArtifactInfo extends AbstractTests {
     assertEquals(FAILED, Objects.requireNonNull(result.task(":" + TASK)).getOutcome());
   }
 
+  /**
+   * Test get artifact info wo group.
+   *
+   * @throws IOException the io exception
+   */
   @Test
-  @DisplayName("wgGetArtifactInfo without group ")
+  @DisplayName("wfGetArtifactInfo without group ")
   public void testGetArtifactInfoWOGroup() throws IOException {
     BuildResult result = this.buildAndFail(getParamsMap(
       "artifact", "warp10-ext-barcode"

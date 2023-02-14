@@ -55,7 +55,8 @@ abstract public class AbstractTests {
     buildFile = new File(testProjectDir, "build.gradle");
     try (InputStream tpl = getClass().getResourceAsStream("/testkit-gradle.properties")) {
       if (null != tpl) {
-        Files.copy(tpl, new File(testProjectDir + File.separator + "gradle.properties").toPath());
+        File props = new File(testProjectDir + File.separator + "gradle.properties");
+        Files.copy(tpl, props.toPath());
       }
     }
   }
@@ -74,7 +75,7 @@ abstract public class AbstractTests {
   }
 
   /**
-   * Build and fail build result.
+   * Build and fail result.
    *
    * @param params the params
    * @param task   the task
@@ -93,7 +94,7 @@ abstract public class AbstractTests {
   }
 
   /**
-   * Build build result.
+   * Build result.
    *
    * @param params the params
    * @param task   the task
@@ -154,11 +155,17 @@ abstract public class AbstractTests {
     return result;
   }
 
+  /**
+   * Print directory tree.
+   *
+   * @param folder the folder
+   */
   static void printDirectoryTree(File folder) {
     StringBuilder sb = new StringBuilder();
     printDirectoryTree(folder, 2, sb);
     System.out.println(sb);
   }
+
   private static void printDirectoryTree(File folder, int indent, StringBuilder sb) {
     if (!folder.isDirectory()) {
       throw new IllegalArgumentException("folder is not a Directory");

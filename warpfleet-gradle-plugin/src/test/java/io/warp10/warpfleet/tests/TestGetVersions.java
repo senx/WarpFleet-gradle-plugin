@@ -26,9 +26,17 @@ import static org.gradle.testkit.runner.TaskOutcome.SUCCESS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * The type Test get versions.
+ */
 public class TestGetVersions extends AbstractTests {
   private static final String TASK = "wfGetVersions";
 
+  /**
+   * Test wf get versions.
+   *
+   * @throws IOException the io exception
+   */
   @Test
   @DisplayName("wfGetVersions with group and artifact")
   public void testWfGetVersions() throws IOException {
@@ -41,6 +49,11 @@ public class TestGetVersions extends AbstractTests {
     assertEquals(SUCCESS, Objects.requireNonNull(result.task(":" + TASK)).getOutcome());
   }
 
+  /**
+   * Test wf get versions latest.
+   *
+   * @throws IOException the io exception
+   */
   @Test
   @DisplayName("wfGetVersions with group, artifact and latest as version")
   public void testWfGetVersionsLatest() throws IOException {
@@ -54,6 +67,11 @@ public class TestGetVersions extends AbstractTests {
     assertEquals(SUCCESS, Objects.requireNonNull(result.task(":" + TASK)).getOutcome());
   }
 
+  /**
+   * Test wf get versions w specific version.
+   *
+   * @throws IOException the io exception
+   */
   @Test
   @DisplayName("wfGetVersions with group, artifact and a specific version")
   public void testWfGetVersionsWSpecificVersion() throws IOException {
@@ -68,6 +86,11 @@ public class TestGetVersions extends AbstractTests {
     assertEquals(SUCCESS, Objects.requireNonNull(result.task(":" + TASK)).getOutcome());
   }
 
+  /**
+   * Test wf get versions wo group and artifact.
+   *
+   * @throws IOException the io exception
+   */
   @Test
   @DisplayName("wfGetVersions without group and artifact")
   public void testWfGetVersionsWOGroupAndArtifact() throws IOException {
@@ -75,6 +98,11 @@ public class TestGetVersions extends AbstractTests {
     assertEquals(FAILED, Objects.requireNonNull(result.task(":" + TASK)).getOutcome());
   }
 
+  /**
+   * Test wf get versions wo artifact.
+   *
+   * @throws IOException the io exception
+   */
   @Test
   @DisplayName("wfGetVersions without artifact")
   public void testWfGetVersionsWOArtifact() throws IOException {
@@ -84,6 +112,11 @@ public class TestGetVersions extends AbstractTests {
     assertEquals(FAILED, Objects.requireNonNull(result.task(":" + TASK)).getOutcome());
   }
 
+  /**
+   * Test wf get versions wo group.
+   *
+   * @throws IOException the io exception
+   */
   @Test
   @DisplayName("wfGetVersions without group ")
   public void testWfGetVersionsWOGroup() throws IOException {

@@ -62,6 +62,11 @@ public class TestGetArtifacts extends AbstractTests {
     assertEquals(SUCCESS, Objects.requireNonNull(result.task(":" + TASK)).getOutcome());
   }
 
+  /**
+   * Test wf get artifacts non existing group.
+   *
+   * @throws IOException the io exception
+   */
   @Test
   @DisplayName("wfGetArtifacts with a non existing group")
   public void testWfGetArtifactsNonExistingGroup() throws IOException {

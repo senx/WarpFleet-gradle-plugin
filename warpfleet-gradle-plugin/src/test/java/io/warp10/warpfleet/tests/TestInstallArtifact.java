@@ -29,15 +29,28 @@ import static org.gradle.testkit.runner.TaskOutcome.SUCCESS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * The type Test install artifact.
+ */
 public class TestInstallArtifact extends AbstractTests {
   private static final String TASK = "wfInstall";
 
+  /**
+   * Simulate warp 10 directory.
+   *
+   * @throws IOException the io exception
+   */
   @BeforeEach
   public void simulateWarp10Directory() throws IOException {
     assertTrue(Paths.get(testProjectDir.getCanonicalPath(), "warp10", "etc", "conf.d").toFile().mkdirs());
     assertTrue(Paths.get(testProjectDir.getCanonicalPath(), "warp10", "lib").toFile().mkdirs());
   }
 
+  /**
+   * Test install artifact.
+   *
+   * @throws IOException the io exception
+   */
   @Test
   @DisplayName("wfInstall")
   public void testInstallArtifact() throws IOException {
@@ -53,6 +66,11 @@ public class TestInstallArtifact extends AbstractTests {
     assertEquals(SUCCESS, Objects.requireNonNull(result.task(":" + TASK)).getOutcome());
   }
 
+  /**
+   * Test install latest artifact.
+   *
+   * @throws IOException the io exception
+   */
   @Test
   @DisplayName("wfInstall with latest as version")
   public void testInstallLatestArtifact() throws IOException {
@@ -69,6 +87,11 @@ public class TestInstallArtifact extends AbstractTests {
     assertEquals(SUCCESS, Objects.requireNonNull(result.task(":" + TASK)).getOutcome());
   }
 
+  /**
+   * Test install artifact specific version.
+   *
+   * @throws IOException the io exception
+   */
   @Test
   @DisplayName("wfInstall with a specific version")
   public void testInstallArtifactSpecificVersion() throws IOException {
@@ -86,6 +109,11 @@ public class TestInstallArtifact extends AbstractTests {
     assertEquals(SUCCESS, Objects.requireNonNull(result.task(":" + TASK)).getOutcome());
   }
 
+  /**
+   * Test install multi artifacts.
+   *
+   * @throws IOException the io exception
+   */
   @Test
   @DisplayName("wfInstall multiple packages")
   public void testInstallMultiArtifacts() throws IOException {

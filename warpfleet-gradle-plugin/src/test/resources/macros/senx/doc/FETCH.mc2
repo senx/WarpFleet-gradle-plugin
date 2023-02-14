@@ -1,0 +1,210 @@
+<%
+  {
+    'name' 'FETCH'
+    'since' '1.0.0'
+    'deprecated' ''
+    'deleted' ''
+    'version' 'all'
+    'tags' [ 'gts' ]
+    'desc' 
+      <'
+The `FETCH` function interacts with the Warp 10 Storage Engine to retrieve data according to given criteria.
+
+`FETCH` either accepts a list of 5 parameters or a map with the parameters. Those are defining the **read access rights**, the **concerned Geo Time Series** and the **time window**. Other parameters in the map input are optional. 
+
+The list input is here to keep backward compatibility with old WarpScripts. The map input allows a great flexibility, as described below.
+
+### Access rights
+A valid read token is needed to read data with fetch. If you use a [metaset](/doc/METASET) and also specify a token, the token included in the metaset will be ignored.
+
+### Concerned Geo Time Series
+`FETCH` selects Geo Time Series according to:
++ The `selectors` parameter, which is a list of selector.
++ If `selectors` is not found, `FETCH` uses the `selector` parameter which is a single selector.
++ If `selector` is not found, `FETCH`  uses both `class` and `labels` parameters.  
+
+### Time window
+`FETCH`  begins from the newest value and stop when the oldest value is collected. Thus, `end` must be defined in your request and defines the newest included value in your time window. If `end` is anterior to your oldest value, the result will be empty (no Geo Time Series). The span of the time window ending at `end` is then defined according to:
++ The `timespan` parameter.
++ If `timespan` is not defined, `FETCH` collects a maximum of `count` point.
++ If `count` is not defined, `FETCH` determines `timespan` with `start`. If `start` is more recent than `end`, `end` and `start` are permuted internally. Both `start` and `end` are included in the time window.
+
+### Boundaries
+Since version 2.3.0, you can define *boundaries* around the requested data. When fetching data based on a time range, both a *pre* and *post* boundaries can be specified. When fetching by count, only a *pre* boundary can be requested.
+Boundaries are a number of datapoints which are either before (*pre* boundary) or after (*post* boundary) the fetched data. Fetching boundaries is very useful when storing only the changes of values as they enable you to always fetch datapoints even if the requested time range does not contain any. They can also be used to fetch the first `N` datapoints after a given timestamp.
+Note that fetching *post* boundaries is less efficient than fetching the requested range or a *pre* boundary as the data has to be scanned in reverse order which has an impact on I/Os and ultimately on performance.
+
+### Sampling options
++ Since version 2.3.0, you can randomly sample points with the `sample` parameter. If `sample` equals 0.1, `FETCH` will randomly return one point out of ten. This implementation is the fastest way to resample data.
++ Since version 2.3.0, you can `skip` the N newest datapoints in the time window specified.
+
+### Query without looking into directory
+The fetch time to read one gts among millions of gts recorded with the same classname, the same application and the same owner can take time. Use the `gts` parameter to select if you exactly know the classname and all the labels.
+
+If you want to read only Geo Time Series attributes or labels, using [FIND](/doc/FIND) is more efficient than fetching the last value.
+
+### FETCH availability 
+You cannot use FETCH within macro unit tests. When macro are loaded, directory and storage are not ready yet, so you will have a null pointer exception during macro loading. To build your unit tests, [WRAP](/doc/WRAP) your data and use [UNWRAP](/doc/UNWRAP) from a string instead of fetch.
+
+      '>
+    'sig' [
+      [ [ [ 'timespan:LONG' 'end:LONG' 'labels:MAP' 'class:STRING' 'token:STRING' ] ]  [ 'data:LIST<GTS>' ]  ]
+      [ [ [ 'end:STRING' 'start:STRING' 'labels:MAP' 'class:STRING' 'token:STRING' ] ]  [ 'data:LIST<GTS>' ] ]
+      [ [ {
+            // Auth
+            'token' 'token:STRING'
+            // Selection
+            'class' 'class:STRING'
+            'labels' 'labels:MAP'
+            'selector' 'selector:STRING'
+            'selectors' 'selectors:LIST<STRING>'
+            'gts' 'gts:LIST<GTS>'
+            'quiet.after' 'quiet.after:LONG'
+            'active.after' 'active.after:LONG'
+            'extra' 'extra:LIST<STRING>'
+            'metaset' 'metaset:STRING'
+            'priority' 'priority:LIST<STRING>'
+            // Window
+            'end' 'end:LONG'
+            'start' 'start:STRING'
+            'timespan' 'timespan:LONG'
+            'count' 'count:LONG'
+            'boundary' 'boundary:LONG'
+            'boundary.pre' 'boundary.pre:LONG'
+            'boundary.post' 'boundary.post:LONG'
+            // Sampling
+            'step' 'step:LONG'
+            'timestep' 'timestep:LONG'
+            'sample' 'sampling.ratio:DOUBLE'
+            'skip' 'skip.count:LONG'
+            // Output
+            'encoders' 'encoders:BOOLEAN'
+            'merge' 'merge:BOOLEAN'
+            'showuuid' 'showuuid:BOOLEAN'
+            'type' 'type:STRING'
+            'typeattr' 'typeattr:STRING'
+            'wtimestamp' 'wtimestamp:BOOLEAN'
+            'ttl' 'ttl:BOOLEAN'
+            // Unused
+            // 'selpairs'
+            'gskip' 'gskip:LONG'
+            'gcount' 'gcount:LONG'
+          } ]  [ 'data:LIST<GTS>' ] ]
+     ]
+    'params' {
+      // Auth
+      'token' 'Read token to use to fetch the data.'
+      // Selection
+      'class' 'Selector for the GTS classes. Can either be an exact match or a regular expression (the value should then start with a *~*).'
+      'labels' 'Map of labels selectors. The key is the label name, the value a selector which can be an exact match or a regular expression (the value should then start with a *~*).'
+      'selector' 'A Geo Time Series™ selector with the syntax `class{labels}` where `class` is an exact match or a regular expression starting with *~* and `labels` a comma separated list of labels selector of the form `name=exact` or `name~regexp`. Names and values must be percent URL encoded if needed.'
+      'selectors' "A list of GTS selectors, each with a syntax identical to that of 'selector'."
+      'gts' 'Explicit list of Geo Time Series™ to fetch. The class and labels will be used as is and not serve as selectors.'
+      'active.after' 'Timestamp after which a GTS must have been updated to be considered for the fetch. This parameter is only considered when activity tracking is enabled.'
+      'quiet.after' 'Timestamp after which a GTS must not have been updated to be considered for the fetch. This parameter is only considered when activity tracking is enabled.'
+      'extra' 'List of extraneous classes to fetch. For each GTS matching the selection criteria, GTS with those extra class names will be fetched too (with the *exact* same set of labels).'
+      'metaset' 'A set of Geo Time Series™ produced by the [`METASET`](/doc/METASET) function.'
+      'priority' 'Priority of the labels when looking in the Directory, first in the list being looked first. Prioritising rare labels can speed up the retreival. Defaults to the order defined by the *warpscript.labels.priority* configuration.'
+      // Window
+      'end' 'Newest timestamp to consider when fetching datapoints. In platform time unit or [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601).'
+      'start' 'Oldest timestamp to consider when fetching datapoints. In platform time unit or [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601).'
+      'timespan' "Depth to consider when fetching the datapoints. If the value is positive then it is interpreted as a duration in time units, if it is negative then as the maximum number of datapoints to fetch. If negative, incompatible with 'count'."
+      'count' "Maximum number of datapoints to fetch for each GTS. Incompatible with negative 'timespan'."
+      'boundary' 'Number of datapoints to include in both *pre* and *post* boundaries.'
+      'boundary.pre' 'Number of datapoints in the *pre* boundary.'
+      'boundary.post' 'Number of datapoints in the *post* boundary.'
+      // Sampling
+      'step' 'Step at which to return data point for each GTS. A step of 3 will return 1 point, then skip 2, then return 1, then skip 2, etc. Defaults to 1, which will not skip any point.'
+      'timestep' 'Minimum time between two returned data points while scanning from newest to oldest point. Points not respecting this parameter are skipped.'
+      'sampling.ratio' 'A probability between 0 (excluded, no datapoints returned) and 1.0 (all datapoints returned). The random sampling is done by the storage layer, which is the most efficient.'
+      'skip.count' 'Set fetch to ignore the N newest points in the time window you specified.'
+      // Output
+      'encoders' 'Whether to return **GTSENCODER** or **GTS**. Defauts to False.'
+      'merge' 'Whether to merge or not the splitted encoders because they exceed *max.encoder.size* or *standalone.max.encoder.size*. Defaults to True.'
+      'showuuid' 'Whether to add or not an *.uuid* attribute to each **GTS**. These UUIDs are based on the internal class and label IDs so they are unique for each **GTS**.'
+      'type' 'Name of type to force for the GTS, either LONG, DOUBLE, BOOLEAN or STRING.'
+      'typeattr' "Name of label to use for storing the GTS type. This option is incompatible with 'type', when set values of different types are ventilated in separate GTS with the same set of class and labels and an additional *type* label of the given name."
+      'wtimestamp' 'Whether to return or not the HBase cell timestamp instead of the value. Only for distributed instances, defaults to False.'
+      'ttl' 'Whether to return or not the HBase cells TTL instead of the value. Only for distributed instances, defaults to False. Only works if KeyValueCodecWithTags codec is enabled.'
+      // Returned
+      'data' 'List of fetched Geo Time Series or **GTSECODERS**.'
+      'gskip' 'Number of GTS to skip before considering GTS.'
+      'gcount' 'Maximum number of GTS to consider.'
+    }
+    'related' [ 'METASET' 'ISO8601' 'FIND' 'FETCHSTRING' 'FETCHLONG' 'FETCHDOUBLE' 'FETCHBOOLEAN' ]
+    'examples' [ 
+<'
+//list parameter, fetch class ending with speed, with label id containing paris.
+//fetch from now the 1000 last values.
+[ $READTOKEN '~.*speed' { 'id' '~.*paris.*' }  NOW -1000 ] FETCH
+0 GET SIZE //take first GTS in the result list. size is 1000
+
+//list parameter, fetch class ending with speed, with label id containing paris.
+//fetch values between two dates. (period is 100ms)
+[ $READTOKEN '~.*speed' { 'id' '~.*paris.*' }  '2013-07-04T19:00:00Z' '2013-07-04T19:31:29Z' ] FETCH
+0 GET SIZE //take first GTS in the result list. size is 14679
+
+//list parameter, fetch class ending with speed, with label id containing paris.
+//fetch values 10 s before 2013-07-04 19h
+[ $READTOKEN '~.*speed' { 'id' '~.*paris.*' }  [ 2013 07 04 19 ] TSELEMENTS->  10 s ] FETCH
+0 GET SIZE //take first GTS in the result list. size is 99 (period was not exactly 100ms)
+
+
+'>
+
+<'
+
+// same examples, with a map parameter, 
+{ 
+    'token' $READTOKEN 
+    'class' '~.*speed'
+    'labels' { 'id' '~.*paris.*' }
+    'end' '2013-07-04T19:00:00Z'  //look backward until this date
+    'count' 1000                  //take 1000 points before this date
+} FETCH 
+0 GET SIZE  //1000 values
+
+{ 
+    'token' $READTOKEN 
+    'class' '~.*speed'
+    'labels' { 'id' '~.*paris.*' }
+    'end' '2013-07-04T19:00:00Z'  //look backward until this date
+    'start' '2013-07-04T19:31:29Z' //no problem, end and start will be permuted internaly
+} FETCH 
+0 GET SIZE //14679 values
+
+{ 
+    'token' $READTOKEN 
+    'class' '~.*speed'
+    'labels' { 'id' '~.*paris.*' }
+    'end' '2013-07-04T19:00:00Z'  //look backward until this date
+    'timespan' 10 s                //take 10 seconds of data before this date
+} FETCH 
+0 GET SIZE //99 values (period was not exactly 100ms)
+
+
+
+
+'>
+<'
+// fetch two GTS without asking directory. You must know exactly all the labels of the GTS you want. 
+// 'gts' can be the output of FIND function.
+{
+  'token' $READTOKEN
+  'gts' [
+    NEWGTS 'temperature' RENAME  { 'device' $type 'serial' $id } RELABEL
+    NEWGTS 'pressure' RENAME  { 'device' $type 'serial' $id } RELABEL
+  ]
+  'end' NOW
+  'count' 1
+} FETCH 
+'>
+    ]
+    'conf' [ 'warp.aes.metasets' 'ingress.activity.window' 'ingress.activity.update' 'ingress.activity.meta' 'warpscript.maxfetch' 'warpscript.maxfetch.hard' ]
+  } INFO
+
+  FETCH
+%>
+'macro' STORE
+// Unit tests
+$macro

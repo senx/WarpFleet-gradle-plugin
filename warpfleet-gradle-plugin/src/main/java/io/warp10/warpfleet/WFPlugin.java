@@ -50,7 +50,7 @@ public class WFPlugin implements Plugin<Project> {
       t.getWFArtifact().set(ext.getArtifact());
     });
 
-    project.getTasks().register("wgGetArtifactInfo", GetArtifactInfo.class, t-> {
+    project.getTasks().register("wfGetArtifactInfo", GetArtifactInfo.class, t-> {
       t.getWFGroup().set(ext.getGroup());
       t.getWFArtifact().set(ext.getArtifact());
       t.getWFVersion().set(ext.getVers());

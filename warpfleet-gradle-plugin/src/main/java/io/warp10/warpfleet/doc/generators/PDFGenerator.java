@@ -24,7 +24,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * The type Pdf generator.
@@ -47,14 +46,7 @@ public class PDFGenerator extends HTMLGenerator {
       }
     }
     for (JSONObject d : doc) {
-      File folder = new File(dest.getCanonicalPath() + File.separator + d.getString("file")).getParentFile();
-      if (!folder.exists()) {
-        if (!folder.mkdirs()) {
-          throw new IOException("Cannot create " + folder.getCanonicalPath());
-        }
-      }
       String fName = d.getString("file").replace(".mc2", ".pdf");
-      //   File f = new File(dest.getCanonicalPath() + File.separator + fName);
       JSONObject docObj = d.optJSONObject("doc");
       if (null == docObj) docObj = new JSONObject();
 
@@ -64,22 +56,10 @@ public class PDFGenerator extends HTMLGenerator {
       }
       index.add(new JSONObject().put("f", fName).put("title", title));
       pages.add(this.renderer.render(this.parser.parse(this.getMarkdown(docObj, title))));
-      //PdfConverterExtension.exportToPdf(f.getCanonicalPath(), this.wrapHTML(this.renderer.render(this.parser.parse(this.getMarkdown(docObj, title))), title), "", OPTIONS);
     }
-
-    String toc = index.stream().map(i -> {
-      try {
-        return this.generateHTMLIndex(i, dest.getCanonicalPath());
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
-    }).collect(Collectors.joining("\n"));
     PdfConverterExtension.exportToPdf(
       dest.getCanonicalPath() + File.separator + "index.pdf",
-      this.wrapHTML(
-        //"<ul class=\"toc\">" + toc + "</ul>" +
-        String.join("\n", pages), "Index"),
-      "", OPTIONS);
+      this.wrapHTML(String.join("\n", pages), "Index"), "", OPTIONS);
     return index;
   }
 }

@@ -54,7 +54,7 @@ public class TestTasks extends AbstractTests {
     assertTrue(result.getOutput().contains("wfGetGroups"));
     assertTrue(result.getOutput().contains("wfGetVersions"));
     assertTrue(result.getOutput().contains("wfInstall"));
-    assertTrue(result.getOutput().contains("wgGetArtifactInfo"));
+    assertTrue(result.getOutput().contains("wfGetArtifactInfo"));
     assertEquals(SUCCESS, Objects.requireNonNull(result.task(":tasks")).getOutcome());
   }
 }

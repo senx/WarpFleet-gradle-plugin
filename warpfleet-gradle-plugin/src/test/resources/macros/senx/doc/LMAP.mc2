@@ -1,0 +1,84 @@
+<%
+  {
+    'name' 'LMAP'
+    'since' '1.0.0'
+    'deprecated' ''
+    'deleted' ''
+    'version' 'all'
+    'tags' [ 'lists' ]
+    'desc' 
+      <'
+The `LMAP` function applies a macro on each element of a **LIST**. It produces a **LIST** with the resulting element on top of the stack after each macro invocation.
+
+The macro is called with a stack containing the **LIST** index on top and the element at that particular index below it. 
+
+Since Warp 10 2.4.0, you can override this behaviour with a boolean.
+      '>
+    'sig' [ 
+      [ [ 'macro:MACRO' 'inputlist:LIST' ]  [ 'results:LIST' ] ] 
+      [ [ 'index:BOOLEAN' 'macro:MACRO' 'inputlist:LIST' ]  [ 'results:LIST' ] ] 
+    ]
+    'params' {
+      'macro' 'This macro will be called for each element in inputlist.'
+      'inputlist' 'List of items'
+      'results' 'List of results left on the top of the stack by each macro'
+      'index' 'When set to true, the current index (=iteration count-1) will be on the top of the stack. By default, true.'
+    }
+    'related' [ 'LFLATMAP' 'FOREACH' 'MMAP' 'LFILTER' ]
+    'examples' [ 
+      <'
+[ 42 21 11 ]
+<% DROP 2 * %> //ignore the index, double the result
+LMAP    
+
+//do the same thing with FOREACH
+[] //new list
+[ 42 21 11 ]
+<% 2 * +! %> //append value*2 on the list
+FOREACH      
+
+      '>
+
+      <'
+//macro to print "list[i]: value" string
+<% 
+    TOSTRING //convert index in string
+    'list[' SWAP + //concatenate list[ before the index
+    ']=' +  //concatenate ]=
+    SWAP //place value on top of the stack
+    TOSTRING +  //convert value in string, concatenate to the string
+%> 'mymacro' STORE
+
+[ 42 21 11 ]
+$mymacro
+LMAP      
+      
+      '>
+<'
+// since Warp 10 2.4.0
+[ 
+  NEWGTS 'gtsA' RENAME
+  NEWGTS 'gtsB' RENAME
+]
+<% NAME %> F LMAP 
+
+'>
+    ]
+    'conf' [ ]
+  } INFO
+
+  LMAP
+%>
+'macro' STORE
+// Unit tests
+[ 0 8 18 ]
+<% - %> //returns index - value
+LMAP
+LIST-> DROP
+16 == ASSERT
+7 == ASSERT
+0 == ASSERT
+
+
+
+$macro

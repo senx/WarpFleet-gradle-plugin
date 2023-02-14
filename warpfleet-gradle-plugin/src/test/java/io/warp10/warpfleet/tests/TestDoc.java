@@ -28,10 +28,19 @@ import java.util.Objects;
 import static org.gradle.testkit.runner.TaskOutcome.SUCCESS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
+/**
+ * The type Test doc.
+ */
 public class TestDoc extends AbstractTests {
   private static final String TASK = "wfDoc";
 
+  /**
+   * Test generate doc default format.
+   *
+   * @throws IOException the io exception
+   */
   @Test
   @DisplayName("wfDoc default output format")
   public void testGenerateDocDefaultFormat() throws IOException {
@@ -50,6 +59,11 @@ public class TestDoc extends AbstractTests {
     assertEquals(SUCCESS, Objects.requireNonNull(result.task(":" + TASK)).getOutcome());
   }
 
+  /**
+   * Test generate doc json.
+   *
+   * @throws IOException the io exception
+   */
   @Test
   @DisplayName("wfDoc JSON output format")
   public void testGenerateDocJSON() throws IOException {
@@ -69,6 +83,11 @@ public class TestDoc extends AbstractTests {
     assertEquals(SUCCESS, Objects.requireNonNull(result.task(":" + TASK)).getOutcome());
   }
 
+  /**
+   * Test generate doc md.
+   *
+   * @throws IOException the io exception
+   */
   @Test
   @DisplayName("wfDoc markdown output format")
   public void testGenerateDocMD() throws IOException {
@@ -88,6 +107,11 @@ public class TestDoc extends AbstractTests {
     assertEquals(SUCCESS, Objects.requireNonNull(result.task(":" + TASK)).getOutcome());
   }
 
+  /**
+   * Test generate doc mark down.
+   *
+   * @throws IOException the io exception
+   */
   @Test
   @DisplayName("wfDoc markdown output format")
   public void testGenerateDocMarkDown() throws IOException {
@@ -107,6 +131,11 @@ public class TestDoc extends AbstractTests {
     assertEquals(SUCCESS, Objects.requireNonNull(result.task(":" + TASK)).getOutcome());
   }
 
+  /**
+   * Test generate doc html.
+   *
+   * @throws IOException the io exception
+   */
   @Test
   @DisplayName("wfDoc html output format")
   public void testGenerateDocHTML() throws IOException {
@@ -126,6 +155,34 @@ public class TestDoc extends AbstractTests {
     assertEquals(SUCCESS, Objects.requireNonNull(result.task(":" + TASK)).getOutcome());
   }
 
+  /**
+   * Test generate doc pdf.
+   *
+   * @throws IOException the io exception
+   */
+  @Test
+  @DisplayName("wfDoc pdf output format")
+  public void testGenerateDocPDF() throws IOException {
+    BuildResult result = this.build(getParamsMap(
+      "url", "https://sandbox.senx.io/api/v0/exec",
+      "source", Paths.get("src", "test", "resources", "macros").toFile().getCanonicalPath(),
+      "dest", new File(testProjectDir, "doc").getCanonicalPath(),
+      "macroDir", "senx",
+      "format", "pdf"
+    ), TASK);
+    printDirectoryTree(Paths.get(testProjectDir.getCanonicalPath(), "doc").toFile());
+    assertTrue(result.getOutput().contains("@senx/nifi/messageToJson"));
+    assertTrue(Paths.get(testProjectDir.getCanonicalPath(), "doc").toFile().exists());
+    assertTrue(Paths.get(testProjectDir.getCanonicalPath(), "doc", "index.pdf").toFile().exists());
+    assertFalse(Paths.get(testProjectDir.getCanonicalPath(), "doc", "senx").toFile().exists());
+    assertEquals(SUCCESS, Objects.requireNonNull(result.task(":" + TASK)).getOutcome());
+  }
+
+  /**
+   * Test generate doc wo macro dir.
+   *
+   * @throws IOException the io exception
+   */
   @Test
   @DisplayName("wfDoc without macroDir")
   public void testGenerateDocWOMacroDir() throws IOException {
