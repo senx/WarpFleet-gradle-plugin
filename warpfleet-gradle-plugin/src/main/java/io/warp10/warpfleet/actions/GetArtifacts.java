@@ -57,7 +57,6 @@ public abstract class GetArtifacts extends DefaultTask {
    */
   @TaskAction
   public void getArtifacts() {
-    System.out.println(this.getWFGroup().getOrNull());
     List<String> groups = new ArrayList<>();
     if (StringUtils.isBlank(this.getWFGroup().getOrNull())) {
       Helper.getGroups().forEach(g -> groups.add(((JSONObject) g).getString("name")));

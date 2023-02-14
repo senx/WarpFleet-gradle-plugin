@@ -66,6 +66,12 @@ public class WFPlugin implements Plugin<Project> {
       t.getWarp10Dir().set(ext.getWarp10Dir());
     });
 
-    project.getTasks().register("wfDoc", GenerateDocumentation.class);
+    project.getTasks().register("wfDoc", GenerateDocumentation.class, t -> {
+      t.getWfFormat().set(ext.getFormat());
+      t.getWfMacroDir().set(ext.getMacroDir());
+      t.getWfDest().set(ext.getDest());
+      t.getWfUrl().set(ext.getUrl());
+      t.getWfSource().set(ext.getSource());
+    });
   }
 }

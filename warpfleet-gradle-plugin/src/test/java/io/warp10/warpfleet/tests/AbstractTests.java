@@ -16,7 +16,6 @@
 
 package io.warp10.warpfleet.tests;
 
-import org.apache.commons.io.IOUtils;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,11 +25,10 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * The type Tests.
@@ -48,12 +46,19 @@ abstract public class AbstractTests {
 
   /**
    * Sets .
+   *
+   * @throws IOException the io exception
    */
   @BeforeEach
   public void setup() throws IOException {
     buildFile = new File(testProjectDir, "build.gradle");
-    Files.copy(Objects.requireNonNull(getClass().getResourceAsStream("/testkit-gradle.properties")), new File(testProjectDir + File.separator + "gradle.properties").toPath());
+    try (InputStream tpl = getClass().getResourceAsStream("/testkit-gradle.properties")) {
+      if (null != tpl) {
+        Files.copy(tpl, new File(testProjectDir + File.separator + "gradle.properties").toPath());
+      }
+    }
   }
+
   /**
    * Write file.
    *
@@ -82,7 +87,7 @@ abstract public class AbstractTests {
       .withProjectDir(testProjectDir)
       .withTestKitDir(testProjectDir)
       .withArguments(task)
-   //   .withJaCoCo()
+      //   .withJaCoCo()
       .buildAndFail();
   }
 

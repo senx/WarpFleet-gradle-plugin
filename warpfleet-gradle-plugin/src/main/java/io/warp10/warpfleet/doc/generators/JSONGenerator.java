@@ -16,6 +16,7 @@
 
 package io.warp10.warpfleet.doc.generators;
 
+import kong.unirest.json.JSONArray;
 import kong.unirest.json.JSONObject;
 import org.apache.commons.io.FileUtils;
 
@@ -24,6 +25,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * The type Json generator.
@@ -63,6 +65,13 @@ public class JSONGenerator extends AbstractGenerator {
       index.add(new JSONObject().put("f", fName).put("title", title));
       FileUtils.write(f, d.toString(2), StandardCharsets.UTF_8);
     }
+    JSONArray toc = new JSONArray();
+    for (JSONObject i : index) {
+        toc.put(new JSONObject()
+          .put("link", i.optString("f", "").replace(dest.getCanonicalPath(), ""))
+          .put("title", i.optString("title", "")));
+    }
+    FileUtils.write(new File(dest.getCanonicalPath() + File.separator + "index.json"), toc.toString(2), StandardCharsets.UTF_8);
     return index;
   }
 }

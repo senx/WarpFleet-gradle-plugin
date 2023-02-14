@@ -71,4 +71,39 @@ public abstract class WarpFleetExtension {
    * @return the repo url
    */
   abstract public Property<String> getRepoURL();
+
+  /**
+   * Gets url.
+   *
+   * @return the url
+   */
+  abstract public Property<String> getUrl();
+
+  /**
+   * Gets source.
+   *
+   * @return the source
+   */
+  abstract public Property<String> getSource();
+
+  /**
+   * Gets dest.
+   *
+   * @return the dest
+   */
+  abstract public Property<String> getDest();
+
+  /**
+   * Gets format.
+   *
+   * @return the format
+   */
+  abstract public Property<String> getFormat();
+
+  /**
+   * Gets macro dir.
+   *
+   * @return the macro dir
+   */
+  abstract  public Property<String> getMacroDir();
 }

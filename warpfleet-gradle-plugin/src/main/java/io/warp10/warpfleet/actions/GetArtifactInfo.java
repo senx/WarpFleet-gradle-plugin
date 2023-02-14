@@ -71,10 +71,11 @@ public abstract class GetArtifactInfo extends DefaultTask {
    */
   @TaskAction
   public void getArtifactInfo() {
-    if (null == this.getWFVersion().getOrNull() || "unspecified".equals(this.getWFVersion().getOrNull()) || "latest".equals(this.getWFVersion().getOrNull())) {
-      this.getWFVersion().set(Helper.getLatest(this.getWFGroup().get(), this.getWFArtifact().get()).getJSONObject("latest").getString("version"));
+    String version = this.getWFVersion().getOrNull();
+    if (null == version || "unspecified".equals(version) || "latest".equals(version)) {
+      version = Helper.getLatest(this.getWFGroup().get(), this.getWFArtifact().get()).getJSONObject("latest").getString("version");
     }
-    JSONObject info = Helper.getArtifactInfo(this.getWFGroup().get(), this.getWFArtifact().get(), this.getWFVersion().get());
+    JSONObject info = Helper.getArtifactInfo(this.getWFGroup().get(), this.getWFArtifact().get(), version);
     System.out.printf("- %s:%s:%s (%s)\n",
       info.getString("group"),
       info.getString("artifact"),

@@ -1,0 +1,54 @@
+{
+  'name' '@senx/nifi/messageToJson'
+  'desc' 
+  <'
+ Convert NiFi payload to JSON map
+  '>
+  'sig' [ [ [ 'payload:BIN' ] [ 'decoded:MAP' ] ] ]
+  'params' {
+    'payload' 'The NiFi binary payload representing a FlowFile'
+    'decoded' 'Produce a JSON payload'
+  }
+  'examples' [
+    <'
+@senx/nifi/messageToJson 'message' STORE
+    '>
+  ]
+} 'info' STORE
+
+<%
+  !$info INFO
+  SAVE 'context' STORE
+  <%
+    STACKTOLIST 'stack' STORE
+    $stack SIZE 0 >
+    <%
+      $stack 0 GET 'content' GET 'UTF-8' BYTES-> 'c' STORE
+      $c '^(\{|\[).*(\}|\])$' MATCH SIZE 0 >
+      <%
+        $stack 0 GET $c JSON->  'content' PUT
+      %>
+      <%
+        $stack 0 GET {}  'content' PUT
+      %>
+      IFTE
+    %>
+    <%
+      { 'content' {} 'attributes' {} }
+    %>
+    IFTE
+  %>
+  <% // catch any exception
+   'ERROR @senx/nifi/messageToJson' LOGMSG
+   ERROR ->JSON LOGMSG
+   RETHROW
+  %>
+  <% // finally, restore the context
+    $context RESTORE
+  %> TRY
+%>
+'macro' STORE
+
+// Unit tests
+
+$macro

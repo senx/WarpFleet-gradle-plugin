@@ -29,6 +29,7 @@ import kong.unirest.json.JSONArray;
 import kong.unirest.json.JSONObject;
 import org.apache.commons.io.FileUtils;
 import org.gradle.api.DefaultTask;
+import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.TaskAction;
@@ -49,36 +50,54 @@ import java.util.stream.Stream;
 /**
  * The type Generate documentation.
  */
-@SuppressWarnings("unused")
-public class GenerateDocumentation extends DefaultTask {
+abstract public class GenerateDocumentation extends DefaultTask {
   /**
-   * The Wf url.
+   * Gets wf url.
+   *
+   * @return the wf url
    */
   @Input
-  String wfURL;
+  @Option(option = "url", description = "Warp 10 url, e.g. http://localhost:8080/api/v0")
+  abstract public Property<String> getWfUrl();
+
   /**
-   * The Source.
-   */
-  @Input
-  @Optional
-  String wfSource;
-  /**
-   * The Dest.
-   */
-  @Input
-  String wfDest;
-  /**
-   * The Format.
+   * Gets wf source.
+   *
+   * @return the wf source
    */
   @Input
   @Optional
-  String wfFormat = "json";
+  @Option(option = "source", description = "Macros source directory, e.g. /path/to/warp10/macros")
+  abstract public Property<String> getWfSource();
+
   /**
-   * The Wf macro dir.
+   * Gets wf dest.
+   *
+   * @return the wf dest
+   */
+  @Input
+  @Option(option = "dest", description = "Output directory, e.g. ./resArr")
+  abstract public Property<String> getWfDest();
+
+  /**
+   * Gets wf format.
+   *
+   * @return the wf format
    */
   @Input
   @Optional
-  String wfMacroDir = "json";
+  @Option(option = "format", description = "Output format (json, html, markdown)")
+  abstract public Property<String> getWfFormat();
+
+  /**
+   * Gets wf macro dir.
+   *
+   * @return the wf macro dir
+   */
+  @Input
+  @Optional
+  @Option(option = "macroDir", description = "Macro sub directory")
+  abstract  public Property<String> getWfMacroDir();
 
   /**
    * Instantiates a new Generate documentation.
@@ -95,13 +114,13 @@ public class GenerateDocumentation extends DefaultTask {
    */
   @TaskAction
   public void generateDocumentation() throws IOException {
-    List<File> filestoProcess = this.getFiles(new File(this.getWfSource()));
+    List<File> filestoProcess = this.getFiles(new File(this.getWfSource().getOrElse(".")));
     List<JSONObject> fileList = new ArrayList<>();
     List<JSONObject> fileListToProcess = new ArrayList<>();
     filestoProcess.forEach(f -> fileList.add(
       new JSONObject()
         .put("fileObj", f)
-        .put("file", f.getAbsolutePath().replace(new File(this.getWfSource()).getAbsolutePath(), "").substring(1))
+        .put("file", f.getAbsolutePath().replace(new File(this.getWfSource().getOrElse(".")).getAbsolutePath(), "").substring(1))
         .put("dir", this.getWfSource())
     ));
     fileList.forEach(f -> {
@@ -117,7 +136,7 @@ public class GenerateDocumentation extends DefaultTask {
         }
         tpl = tpl.replace("{{macro}}", wrapMacro(macroWS));
         Logger.messageInfo("Generating documentation for " + macro);
-        String res = Unirest.post(this.getWfURL())
+        String res = Unirest.post(this.getWfUrl().getOrElse("http://localhost:8080/api/v0/exec"))
           .header("Content-Type", "text/plain")
           .body(tpl)
           .asString()
@@ -133,7 +152,7 @@ public class GenerateDocumentation extends DefaultTask {
       }
     });
     AtomicReference<AbstractGenerator> generator = new AtomicReference<>();
-    switch (this.getWfFormat()) {
+    switch (this.getWfFormat().getOrElse("json")) {
       case "md":
       case "markdown":
         generator.set(new MarkdownGenerator());
@@ -149,11 +168,11 @@ public class GenerateDocumentation extends DefaultTask {
         generator.set(new JSONGenerator());
         break;
     }
-    String dest = this.getWfDest();
+    String dest = this.getWfDest().getOrElse(".");
     if (dest.startsWith(".")) {
       dest = System.getProperty("user.dir") + File.separator + dest;
     }
-    Logger.messageInfo("Generating " + this.getWfFormat() + " files into " + new File(dest).getCanonicalPath());
+    Logger.messageInfo("Generating " + this.getWfFormat().getOrElse("json") + " files into " + new File(dest).getCanonicalPath());
     List<JSONObject> output = generator.get().output(new File(dest), fileListToProcess);
 
     Logger.messageSusccess(output.size() + " scripts parsed");
@@ -170,100 +189,5 @@ public class GenerateDocumentation extends DefaultTask {
     )) {
       return stream.map(Path::toFile).collect(Collectors.toList());
     }
-  }
-
-  /**
-   * Gets wf url.
-   *
-   * @return the wf url
-   */
-  public String getWfURL() {
-    return wfURL;
-  }
-
-  /**
-   * Sets wf url.
-   *
-   * @param wfURL the wf url
-   */
-  @Option(option = "url", description = "Warp 10 url, e.g. http://localhost:8080/api/v0")
-  public void setWfURL(String wfURL) {
-    this.wfURL = wfURL;
-  }
-
-  /**
-   * Gets wf source.
-   *
-   * @return the wf source
-   */
-  public String getWfSource() {
-    return null != wfSource ? wfSource : ".";
-  }
-
-  /**
-   * Sets wf source.
-   *
-   * @param wfSource the wf source
-   */
-  @Option(option = "source", description = "Macros source directory, e.g. /path/to/warp10/macros")
-  public void setWfSource(String wfSource) {
-    this.wfSource = wfSource;
-  }
-
-  /**
-   * Gets wf dest.
-   *
-   * @return the wf dest
-   */
-  public String getWfDest() {
-    return wfDest;
-  }
-
-  /**
-   * Sets wf dest.
-   *
-   * @param wfDest the wf dest
-   */
-  @Option(option = "dest", description = "Output directory, e.g. ./resArr")
-  public void setWfDest(String wfDest) {
-    this.wfDest = wfDest;
-  }
-
-  /**
-   * Gets wf format.
-   *
-   * @return the wf format
-   */
-  public String getWfFormat() {
-    return null != wfFormat ? wfFormat : "json";
-  }
-
-  /**
-   * Sets wf format.
-   *
-   * @param wfFormat the wf format
-   */
-  @Option(option = "format", description = "Output format (json, html, markdown)")
-  public void setWfFormat(String wfFormat) {
-    this.wfFormat = wfFormat;
-  }
-
-  /**
-   * Gets wf macro dir.
-   *
-   * @return the wf macro dir
-   */
-  public String getWfMacroDir() {
-    return null != wfMacroDir ? wfMacroDir : ".";
-  }
-
-  /**
-   * Sets wf macro dir.
-   *
-   * @param wfMacroDir the wf macro dir
-   */
-  @Option(option = "macroDir", description = "Macro sub directory")
-  public void setWfMacroDir(String wfMacroDir) {
-    this.wfMacroDir = wfMacroDir;
   }
 }
