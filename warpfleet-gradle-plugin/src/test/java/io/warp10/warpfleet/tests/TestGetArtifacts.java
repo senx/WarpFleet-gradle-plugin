@@ -14,8 +14,7 @@
  *   limitations under the License.
  */
 
-import org.gradle.testkit.runner.BuildResult;
-import org.gradle.testkit.runner.GradleRunner;
+package io.warp10.warpfleet.tests;import org.gradle.testkit.runner.BuildResult;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -32,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * The type Test get artifacts.
  */
 public class TestGetArtifacts extends AbstractTests {
+  private static final String TASK = "wfGetArtifacts";
 
 
   /**
@@ -42,19 +42,10 @@ public class TestGetArtifacts extends AbstractTests {
   @Test
   @DisplayName("wfGetArtifacts with no group")
   public void testWfGetArtifactsWithNoGroup() throws IOException {
-    String buildFileContent = "plugins { id \"io.warp10.warpfleet-gradle-plugin\" }\n";
-    writeFile(buildFile, buildFileContent);
-
-    BuildResult result = GradleRunner.create()
-      .withPluginClasspath()
-      .withProjectDir(testProjectDir)
-      .withTestKitDir(testProjectDir)
-      .withArguments("wfGetArtifacts")
-      .build();
-
+    BuildResult result = this.build(getParamsMap(), TASK);
     assertTrue(result.getOutput().contains("io.warp10:warp10-ext-s3"));
     assertTrue(result.getOutput().contains("io.senx:warp10-ext-web3"));
-    assertEquals(SUCCESS, Objects.requireNonNull(result.task(":wfGetArtifacts")).getOutcome());
+    assertEquals(SUCCESS, Objects.requireNonNull(result.task(":" + TASK)).getOutcome());
   }
 
   /**
@@ -65,39 +56,16 @@ public class TestGetArtifacts extends AbstractTests {
   @Test
   @DisplayName("wfGetArtifacts with group")
   public void testWfGetArtifactsWithGroup() throws IOException {
-    String buildFileContent = "plugins { id \"io.warp10.warpfleet-gradle-plugin\" }\n"
-      + "warpfleet {\n"
-      + "  group = 'io.warp10'\n" +
-      "}\n";
-    writeFile(buildFile, buildFileContent);
-
-    BuildResult result = GradleRunner.create()
-      .withPluginClasspath()
-      .withProjectDir(testProjectDir)
-      .withTestKitDir(testProjectDir)
-      .withArguments("wfGetArtifacts")
-      .build();
-
+    BuildResult result = this.build(getParamsMap("group", "io.warp10"), TASK);
     assertTrue(result.getOutput().contains("io.warp10:warp10-ext-s3"));
     assertFalse(result.getOutput().contains("io.senx:warp10-ext-web3"));
-    assertEquals(SUCCESS, Objects.requireNonNull(result.task(":wfGetArtifacts")).getOutcome());
+    assertEquals(SUCCESS, Objects.requireNonNull(result.task(":" + TASK)).getOutcome());
   }
+
   @Test
   @DisplayName("wfGetArtifacts with a non existing group")
   public void testWfGetArtifactsNonExistingGroup() throws IOException {
-    String buildFileContent = "plugins { id \"io.warp10.warpfleet-gradle-plugin\" }\n" +
-       "warpfleet {\n" +
-       "  group = 'dummy'\n" +
-      "}\n";
-    writeFile(buildFile, buildFileContent);
-
-    BuildResult result = GradleRunner.create()
-      .withPluginClasspath()
-      .withProjectDir(testProjectDir)
-      .withTestKitDir(testProjectDir)
-      .withArguments("wfGetArtifacts")
-      .buildAndFail();
-
-    assertEquals(FAILED, Objects.requireNonNull(result.task(":wfGetArtifacts")).getOutcome());
+    BuildResult result = this.buildAndFail(getParamsMap("group", "dummy"), TASK);
+    assertEquals(FAILED, Objects.requireNonNull(result.task(":" + TASK)).getOutcome());
   }
 }

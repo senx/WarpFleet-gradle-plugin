@@ -28,7 +28,7 @@ pipeline {
     NEXUS_HOST = "${env.nexusHost}"
     NEXUS_CREDS = credentials('nexus')
     OSSRH_CREDS = credentials('ossrh')
-    GRADLE_CMD = 'docker run --rm -v "$PWD":/home/gradle/project -w /home/gradle/project gradle:7.6.0-jdk19-alpine gradle \
+    GRADLE_CMD = './gradlew \
                 -Psigning.gnupg.keyName=$GPG_KEY_NAME \
                 -PossrhUsername=$OSSRH_CREDS_USR \
                 -PossrhPassword=$OSSRH_CREDS_PSW \

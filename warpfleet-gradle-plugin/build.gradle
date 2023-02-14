@@ -8,19 +8,19 @@ plugins {
     id 'signing'
     id 'net.nemerosa.versioning' version "2.15.1"
     id 'io.codearte.nexus-staging' version "0.30.0"
+    id "pl.droidsonroids.jacoco.testkit" version "1.0.9"
 
 }
 versioning {
     gitRepoRootDir = '.'
 }
 
-println versioning.info.full
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
 project.group 'io.warp10'
 project.version '1.0-SNAPSHOT'
 project.description = 'WarpFleet Gradle Plugin'
-project.version = versioning.info.lastTag + ((versioning.info.tag != null) ? '' : '-' + versioning.info.build)
+project.version = versioning.info.lastTag + (versioning.info.tag != null ? '' : '-' + versioning.info.build)
 
 java {
     withJavadocJar()
@@ -30,17 +30,11 @@ java {
 repositories {
     mavenCentral()
 }
-configurations {
-    provided
-}
-
-sourceSets {
-    main {
-        compileClasspath = compileClasspath + configurations.provided
-    }
-}
 
 jacocoTestReport {
+    dependsOn test
+    additionalClassDirs.from = layout.buildDirectory.dir("classes/main/java")
+    additionalSourceDirs.from = layout.buildDirectory.dir("src/main/java")
     reports {
         xml.required = false
         csv.required = false
@@ -49,13 +43,12 @@ jacocoTestReport {
     }
 }
 
-
 dependencies {
     implementation 'com.konghq:unirest-java:3.14.1'
     implementation 'commons-io:commons-io:2.11.0'
     implementation 'org.apache.commons:commons-lang3:3.12.0'
     implementation 'org.apache.commons:commons-text:1.10.0'
-    implementation 'com.vladsch.flexmark:flexmark-all:0.64.0'
+    implementation 'com.vladsch.flexmark:flexmark-all:0.62.2'
 
     testImplementation gradleTestKit()
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
@@ -64,12 +57,11 @@ dependencies {
 
 test {
     useJUnitPlatform()
-
     maxHeapSize = '1G'
-
     testLogging {
         events "passed"
     }
+    finalizedBy jacocoTestReport
 }
 
 

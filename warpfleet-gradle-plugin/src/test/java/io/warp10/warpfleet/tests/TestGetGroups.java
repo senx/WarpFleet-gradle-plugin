@@ -14,8 +14,7 @@
  *   limitations under the License.
  */
 
-import org.gradle.testkit.runner.BuildResult;
-import org.gradle.testkit.runner.GradleRunner;
+package io.warp10.warpfleet.tests;import org.gradle.testkit.runner.BuildResult;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -30,6 +29,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * The type Test get groups.
  */
 public class TestGetGroups extends AbstractTests {
+  private static final String TASK = "wfGetGroups";
+
   /**
    * Test wf get groups.
    *
@@ -38,18 +39,9 @@ public class TestGetGroups extends AbstractTests {
   @Test
   @DisplayName("wfGetGroups")
   public void testWfGetGroups() throws IOException {
-    String buildFileContent = "plugins { id \"io.warp10.warpfleet-gradle-plugin\" }\n";
-    this.writeFile(this.buildFile, buildFileContent);
-
-    BuildResult result = GradleRunner.create()
-      .withPluginClasspath()
-      .withProjectDir(this.testProjectDir)
-      .withTestKitDir(this.testProjectDir)
-      .withArguments("wfGetGroups")
-      .build();
-
+    BuildResult result = this.build(getParamsMap(), TASK);
     assertTrue(result.getOutput().contains("io.warp10"));
     assertTrue(result.getOutput().contains("io.senx"));
-    assertEquals(SUCCESS, Objects.requireNonNull(result.task(":wfGetGroups")).getOutcome());
+    assertEquals(SUCCESS, Objects.requireNonNull(result.task(":" + TASK)).getOutcome());
   }
 }

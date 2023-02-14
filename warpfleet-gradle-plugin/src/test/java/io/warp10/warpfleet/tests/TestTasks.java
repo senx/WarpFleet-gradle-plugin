@@ -14,7 +14,7 @@
  *   limitations under the License.
  */
 
-import org.gradle.testkit.runner.BuildResult;
+package io.warp10.warpfleet.tests;import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
