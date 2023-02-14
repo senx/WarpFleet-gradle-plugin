@@ -33,7 +33,6 @@ import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.options.Option;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -134,6 +133,7 @@ abstract public class InstallArtifact extends DefaultTask {
     List<PackageInfo> packages = new ArrayList<>();
 
     try {
+      String vers = this.getWfVersion().getOrNull();
       // Test inputs
       if (!StringUtils.isBlank(this.getWfPackages().getOrNull()) && !"unspecified".equals(this.getWfPackages().getOrNull())) {
         packages = Arrays.stream(this.getWfPackages().get().split(",")).map(p -> {
@@ -165,8 +165,8 @@ abstract public class InstallArtifact extends DefaultTask {
           return packageInfo;
         }).collect(Collectors.toList());
       } else {
-        if (StringUtils.isBlank(this.getWfVersion().getOrNull()) || "unspecified".equals(this.getWfVersion().getOrNull()) || "latest".equals(this.getWfVersion().getOrNull())) {
-          this.getWfVersion().set(Helper.getLatest(this.getWfGroup().get(), this.getWfArtifact().get()).getJSONObject("latest").getString("version"));
+        if (StringUtils.isBlank(vers) || "unspecified".equals(vers) || "latest".equals(vers)) {
+          vers = Helper.getLatest(this.getWfGroup().get(), this.getWfArtifact().get()).getJSONObject("latest").getString("version");
         }
         if (StringUtils.isBlank(this.getWfGroup().getOrNull()) || "unspecified".equals(this.getWfGroup().getOrNull())) {
           Logger.messageError("Artifact's group is mandatory");
@@ -180,10 +180,11 @@ abstract public class InstallArtifact extends DefaultTask {
           Logger.messageError("Warp 10 root directory is mandatory");
           return;
         }
-        if (StringUtils.isBlank(this.getWfClassifier().getOrNull()) || "unspecified".equals(this.getWfClassifier().getOrNull())) {
-          this.getWfClassifier().set((String) null);
+        String classifier = this.getWfClassifier().getOrNull();
+        if (StringUtils.isBlank(classifier) || "unspecified".equals(classifier)) {
+          classifier = null;
         }
-        packages.add(new PackageInfo(this.getWfGroup().get(), this.getWfArtifact().get(), this.getWfVersion().get(), this.getWfClassifier().getOrNull()));
+        packages.add(new PackageInfo(this.getWfGroup().get(), this.getWfArtifact().get(), vers, classifier));
       }
       // process packages
       for (PackageInfo pi : packages) {
@@ -192,13 +193,9 @@ abstract public class InstallArtifact extends DefaultTask {
         Logger.messageInfo("Installing " + pi + " into: " + this.getWarp10Dir().get());
 
         if (null != info.getJSONArray("macros")) {
-          info.getJSONArray("macros").forEach(m -> {
-            try {
-              Helper.getMacro(this.getWfGroup().get(), this.getWfArtifact().get(), this.getWfVersion().get(), (JSONObject) m, this.getWarp10Dir().get());
-            } catch (IOException e) {
-              throw new RuntimeException(e);
-            }
-          });
+          for (Object m : info.getJSONArray("macros")) {
+            Helper.getMacro(this.getWfGroup().get(), this.getWfArtifact().get(), vers, (JSONObject) m, this.getWarp10Dir().get());
+          }
         }
         JSONArray dependencies = info.optJSONArray("dependencies");
         if (null == dependencies) {

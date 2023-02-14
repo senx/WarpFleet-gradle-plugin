@@ -29,6 +29,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * The type Tests.
@@ -87,7 +88,7 @@ abstract public class AbstractTests {
       .withProjectDir(testProjectDir)
       .withTestKitDir(testProjectDir)
       .withArguments(task)
-      //   .withJaCoCo()
+      .forwardOutput()
       .buildAndFail();
   }
 
@@ -105,6 +106,7 @@ abstract public class AbstractTests {
       .withPluginClasspath()
       .withProjectDir(testProjectDir)
       .withTestKitDir(testProjectDir)
+      .forwardOutput()
       .withArguments(task)
       .build();
   }
@@ -119,8 +121,14 @@ abstract public class AbstractTests {
     this.writeFile(buildFile, buildFileContent.toString());
   }
 
+  /**
+   * Gets params map.
+   *
+   * @param data the data
+   * @return the params map
+   */
   public static Map<String, String> getParamsMap(String... data) {
-    Map<String, String> result = new HashMap<String, String>();
+    Map<String, String> result = new HashMap<>();
 
     if (data.length % 2 != 0) {
       throw new IllegalArgumentException("Odd number of arguments");
@@ -144,5 +152,37 @@ abstract public class AbstractTests {
     }
 
     return result;
+  }
+
+  static void printDirectoryTree(File folder) {
+    StringBuilder sb = new StringBuilder();
+    printDirectoryTree(folder, 2, sb);
+    System.out.println(sb);
+  }
+  private static void printDirectoryTree(File folder, int indent, StringBuilder sb) {
+    if (!folder.isDirectory()) {
+      throw new IllegalArgumentException("folder is not a Directory");
+    }
+    sb.append(getIndentString(indent)).append("+--").append(folder.getName()).append("/\n");
+    for (File file : Objects.requireNonNull(folder.listFiles())) {
+      if (file.isDirectory()) {
+        printDirectoryTree(file, indent + 1, sb);
+      } else {
+        printFile(file, indent + 1, sb);
+      }
+    }
+
+  }
+
+  private static void printFile(File file, int indent, StringBuilder sb) {
+    sb.append(getIndentString(indent)).append("+--").append(file.getName()).append("\n");
+  }
+
+  private static String getIndentString(int indent) {
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < indent; i++) {
+      sb.append("|  ");
+    }
+    return sb.toString();
   }
 }
