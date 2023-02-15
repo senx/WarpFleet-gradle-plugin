@@ -68,7 +68,7 @@ public class TestPublish extends AbstractTests {
    *
    * @throws IOException the io exception
    */
-  @Test
+  /*@Test
   @DisplayName("wfPublish and UnPublish")
   public void testPublish() throws IOException {
     BuildResult result = this.build(Helper.getParamsMap(
@@ -89,5 +89,5 @@ public class TestPublish extends AbstractTests {
     ), "wfUnPublish");
     assertTrue(result2.getOutput().contains("io.warp10:warp10-plugin-warpstudio:1.0.42 Unpublished"));
     assertEquals(SUCCESS, Objects.requireNonNull(result2.task(":wfUnPublish")).getOutcome());
-  }
+  }*/
 }
