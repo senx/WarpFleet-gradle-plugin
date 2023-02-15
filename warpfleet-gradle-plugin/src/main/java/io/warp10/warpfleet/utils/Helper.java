@@ -180,6 +180,11 @@ public class Helper {
    */
   public static void processHTTPError(HttpResponse<?> response) {
     Logger.messageError("Oh No! Status: " + response.getStatus());
+    Logger.messageError(response.getStatusText());
+    response.getHeaders()
+      .all().stream()
+      .filter(h -> h.getName().contains("X-Warp10"))
+      .forEach(h -> Logger.messageError(h.getName() + ": " + h.getValue()));
     response.getParsingError().ifPresent(e -> {
       Logger.messageError("Parsing Exception: " + e.getMessage());
       Logger.messageError("Original body: " + e.getOriginalBody());
@@ -248,7 +253,7 @@ public class Helper {
   public static String getFileAsString(final String fileName, Class<?> clazz) throws IOException, IllegalArgumentException {
     InputStream is = Helper.getFileAsIOStream(fileName, clazz);
     StringBuilder sb = new StringBuilder();
-    try (InputStreamReader isr = new InputStreamReader(is);
+    try (InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
          BufferedReader br = new BufferedReader(isr)) {
       String line;
       while ((line = br.readLine()) != null) {

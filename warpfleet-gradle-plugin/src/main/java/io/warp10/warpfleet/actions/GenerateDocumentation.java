@@ -137,7 +137,7 @@ abstract public class GenerateDocumentation extends DefaultTask {
         tpl = tpl.replace("{{macro}}", wrapMacro(macroWS));
         Logger.messageInfo("Generating documentation for " + macro);
         String res = Unirest.post(this.getWfUrl().getOrElse("http://localhost:8080/api/v0/exec"))
-          .header("Content-Type", "text/plain")
+          .header("Content-Type", "text/plain;charset=utf-8")
           .body(tpl)
           .asString()
           .ifFailure(Helper::processHTTPError)

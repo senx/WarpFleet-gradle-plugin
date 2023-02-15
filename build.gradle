@@ -9,9 +9,9 @@ warpfleet {
     artifact = 'warp10-ext-barcode'
 
     url = "https://sandbox.senx.io/api/v0/exec"
-    source = "warpfleet-gradle-plugin/src/test/resources/macros"
+    source = "/opt/tmp"
     dest = "./doc"
-    macroDir = "senx"
-    format = "html"
+    macroDir = "doc"
+    format = "json"
 }
 
