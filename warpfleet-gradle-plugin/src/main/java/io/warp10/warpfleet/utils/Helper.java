@@ -28,15 +28,21 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * The type Helper.
  */
 public class Helper {
+  /**
+   * The constant WF_URL.
+   */
   public static final String WF_URL = "https://warpfleet.senx.io";
 
   /**
@@ -342,5 +348,35 @@ public class Helper {
       }
     }
     return result;
+  }
+
+
+  /**
+   * Sign artefact.
+   *
+   * @param f        the f
+   * @param gpgKeyId the gpg key id
+   * @param gpgArg   the gpg arg
+   * @throws IOException          the io exception
+   * @throws InterruptedException the interrupted exception
+   */
+  public static void signArtefact(File f, String gpgKeyId, String gpgArg) throws IOException, InterruptedException {
+    Logger.messageInfo("Signing artifact");
+    List<String> gpgArgs = new ArrayList<>();
+    gpgArgs.add("gpg");
+    gpgArgs.add("--sign");
+    gpgArgs.add("--yes");
+    if (null != gpgArg) {
+      Collections.addAll(gpgArgs, gpgArg.split(" "));
+    }
+    if (null != gpgKeyId) {
+      gpgArgs.add("--default-key");
+      gpgArgs.add(gpgKeyId);
+    }
+    gpgArgs.add(f.getCanonicalPath());
+    gpgArgs = gpgArgs.stream().map(String::trim).collect(Collectors.toList());
+    Helper.execCmd(gpgArgs);
+    FileUtils.delete(f);
+    Logger.messageSusccess("Artifact signed");
   }
 }

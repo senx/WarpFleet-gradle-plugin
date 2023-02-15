@@ -15,6 +15,6 @@ warpfleet {
     format = "json"
     gpgKeyId = "301800F812A1D6B68972E5D0B82E4344AAD46904"
     wfJson = "/home/xavier/workspace/warp10-warpstudio-plugin/wf.json"
-    vers = "2.0.9"
+    vers = "1.0.42"
 }
 

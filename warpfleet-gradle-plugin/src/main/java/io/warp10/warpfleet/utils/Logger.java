@@ -72,7 +72,7 @@ public class Logger {
   /**
    * The constant ANSI_WARN.
    */
-  public static final String ANSI_WARN = "/!\\";
+  public static final String ANSI_WARN = "⚠";
 
   /**
    * Instantiates a new Logger.

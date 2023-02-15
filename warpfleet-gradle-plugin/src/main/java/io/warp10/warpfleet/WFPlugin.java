@@ -23,6 +23,7 @@ import io.warp10.warpfleet.actions.GetGroups;
 import io.warp10.warpfleet.actions.GetVersions;
 import io.warp10.warpfleet.actions.InstallArtifact;
 import io.warp10.warpfleet.actions.Publish;
+import io.warp10.warpfleet.actions.UnPublish;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 
@@ -76,6 +77,14 @@ public class WFPlugin implements Plugin<Project> {
     });
 
     project.getTasks().register("wfPublish", Publish.class, t -> {
+      t.getRepoUrl().set(ext.getRepoUrl());
+      t.getVers().set(ext.getVers());
+      t.getGpgKeyId().set(ext.getGpgKeyId());
+      t.getGpgArg().set(ext.getGpgArg());
+      t.getWFJson().set(ext.getWfJson());
+    });
+
+    project.getTasks().register("wfUnPublish", UnPublish.class, t -> {
       t.getRepoUrl().set(ext.getRepoUrl());
       t.getVers().set(ext.getVers());
       t.getGpgKeyId().set(ext.getGpgKeyId());

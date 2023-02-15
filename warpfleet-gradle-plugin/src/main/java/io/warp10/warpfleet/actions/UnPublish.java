@@ -23,6 +23,7 @@ import kong.unirest.Unirest;
 import kong.unirest.json.JSONObject;
 import org.apache.commons.io.FileUtils;
 import org.gradle.api.DefaultTask;
+import org.gradle.api.internal.tasks.userinput.UserInputHandler;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.Optional;
@@ -32,13 +33,16 @@ import org.gradle.api.tasks.options.Option;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
- * The type Publish.
+ * The type Un publish.
  */
-abstract public class Publish extends DefaultTask {
+abstract public class UnPublish extends DefaultTask {
+  /**
+   * The User input.
+   */
+  UserInputHandler userInput = getServices().get(UserInputHandler.class);
+
   /**
    * Gets repo url.
    *
@@ -89,22 +93,21 @@ abstract public class Publish extends DefaultTask {
   abstract public Property<String> getWFJson();
 
   /**
-   * Instantiates a new Publish.
+   * Instantiates a new Un publish.
    */
-  public Publish() {
-    this.setDescription("Publishes a plugin, macro or extension against WarpFleet");
+  public UnPublish() {
+    this.setDescription("Unpublishes a plugin, macro or extension against WarpFleet");
     this.setGroup(Constants.GROUP);
   }
 
   /**
-   * Publish artifact.
+   * Un publish artifact.
    *
    * @throws IOException          the io exception
    * @throws InterruptedException the interrupted exception
    */
   @TaskAction
-  public void publishArtifact() throws IOException, InterruptedException {
-    // Checks
+  public void unPublishArtifact() throws IOException, InterruptedException {
     File wfJson = new File(this.getWFJson().get());
     if (!wfJson.exists()) {
       throw new RuntimeException("Cannot reach wf.json");
@@ -117,48 +120,43 @@ abstract public class Publish extends DefaultTask {
     if (null != this.getVers().getOrNull()) {
       conf.put("version", this.getVers().get());
     }
-
-    Logger.messageInfo("About to publish: " +
+    boolean answer = userInput.askYesNoQuestion("Are you sure to unpublish " +
       conf.getString("group") + ":" +
       conf.getString("artifact") + ":" +
-      conf.getString("version")
-    );
-
-    List<String> missingFiles = new ArrayList<>();
-    if (!new File("README.md").exists()) {
-      missingFiles.add("README.md");
-    }
-
-    if (!missingFiles.isEmpty()) {
-      Logger.messageError("Some mandatory files ar missing: " + String.join(", ", missingFiles));
-      throw new RuntimeException("Missing mandatory files");
-    }
-
-    // GPG signature
-    File tmpConf = new File(wfJson.getCanonicalPath() + ".tmp");
-    FileUtils.write(tmpConf, conf.toString(2), StandardCharsets.UTF_8);
-    Helper.signArtefact(tmpConf, this.getGpgKeyId().getOrNull(), this.getGpgArg().getOrNull());
-
-    // Publication
-    Logger.messageInfo("Publishing");
-    JSONObject result = Unirest.post(Helper.WF_URL + "/data/publish")
-      .field("sig", new File(tmpConf.getCanonicalPath() + ".gpg"))
-      .field("meta", conf.toString(2))
-      .asJson().ifFailure(Helper::processHTTPError)
-      .getBody().getObject();
-    FileUtils.delete(new File(tmpConf.getCanonicalPath() + ".gpg"));
-    if (!result.optBoolean("status", false)) {
-      Logger.messageError("An error Occurs");
-      if (result.has("message")) {
-        Logger.messageError(result.getString("message"));
-        throw new RuntimeException(result.getString("message"));
-      }
-    } else {
-      Logger.messageSusccess(
+      conf.getString("version") + "?", false);
+    if (answer) {
+      Logger.messageInfo("About to unpublish: " +
         conf.getString("group") + ":" +
-          conf.getString("artifact") + ":" +
-          conf.getString("version") + " Published"
+        conf.getString("artifact") + ":" +
+        conf.getString("version")
       );
+
+      // GPG signature
+      File tmpConf = new File(wfJson.getCanonicalPath() + ".tmp");
+      FileUtils.write(tmpConf, conf.toString(2), StandardCharsets.UTF_8);
+      Helper.signArtefact(tmpConf, this.getGpgKeyId().getOrNull(), this.getGpgArg().getOrNull());
+
+      Logger.messageInfo("Unpublishing");
+      JSONObject result = Unirest.post(Helper.WF_URL + "/data/unpublish")
+        .field("sig", new File(tmpConf.getCanonicalPath() + ".gpg"))
+        .field("meta", conf.toString(2))
+        .asJson().ifFailure(Helper::processHTTPError)
+        .getBody().getObject();
+      FileUtils.delete(new File(tmpConf.getCanonicalPath() + ".gpg"));
+      if (!result.optBoolean("status", false)) {
+        Logger.messageError("An error Occurs");
+        if (result.has("message")) {
+          Logger.messageError(result.getString("message"));
+          throw new RuntimeException(result.getString("message"));
+        }
+      } else {
+        Logger.messageSusccess(
+          conf.getString("group") + ":" +
+            conf.getString("artifact") + ":" +
+            conf.getString("version") + " Unpublished"
+        );
+      }
+
     }
   }
 }
