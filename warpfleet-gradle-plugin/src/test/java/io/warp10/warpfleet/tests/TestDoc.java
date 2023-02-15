@@ -16,6 +16,7 @@
 
 package io.warp10.warpfleet.tests;
 
+import io.warp10.warpfleet.utils.Helper;
 import org.gradle.testkit.runner.BuildResult;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,8 +28,8 @@ import java.util.Objects;
 
 import static org.gradle.testkit.runner.TaskOutcome.SUCCESS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * The type Test doc.
@@ -44,7 +45,7 @@ public class TestDoc extends AbstractTests {
   @Test
   @DisplayName("wfDoc default output format")
   public void testGenerateDocDefaultFormat() throws IOException {
-    BuildResult result = this.build(getParamsMap(
+    BuildResult result = this.build(Helper.getParamsMap(
       "url", "https://sandbox.senx.io/api/v0/exec",
       "source", Paths.get("src", "test", "resources", "macros").toFile().getCanonicalPath(),
       "dest", new File(testProjectDir, "doc").getCanonicalPath(),
@@ -67,7 +68,7 @@ public class TestDoc extends AbstractTests {
   @Test
   @DisplayName("wfDoc JSON output format")
   public void testGenerateDocJSON() throws IOException {
-    BuildResult result = this.build(getParamsMap(
+    BuildResult result = this.build(Helper.getParamsMap(
       "url", "https://sandbox.senx.io/api/v0/exec",
       "source", Paths.get("src", "test", "resources", "macros").toFile().getCanonicalPath(),
       "dest", new File(testProjectDir, "doc").getCanonicalPath(),
@@ -91,7 +92,7 @@ public class TestDoc extends AbstractTests {
   @Test
   @DisplayName("wfDoc markdown output format")
   public void testGenerateDocMD() throws IOException {
-    BuildResult result = this.build(getParamsMap(
+    BuildResult result = this.build(Helper.getParamsMap(
       "url", "https://sandbox.senx.io/api/v0/exec",
       "source", Paths.get("src", "test", "resources", "macros").toFile().getCanonicalPath(),
       "dest", new File(testProjectDir, "doc").getCanonicalPath(),
@@ -115,7 +116,7 @@ public class TestDoc extends AbstractTests {
   @Test
   @DisplayName("wfDoc markdown output format")
   public void testGenerateDocMarkDown() throws IOException {
-    BuildResult result = this.build(getParamsMap(
+    BuildResult result = this.build(Helper.getParamsMap(
       "url", "https://sandbox.senx.io/api/v0/exec",
       "source", Paths.get("src", "test", "resources", "macros").toFile().getCanonicalPath(),
       "dest", new File(testProjectDir, "doc").getCanonicalPath(),
@@ -139,7 +140,7 @@ public class TestDoc extends AbstractTests {
   @Test
   @DisplayName("wfDoc html output format")
   public void testGenerateDocHTML() throws IOException {
-    BuildResult result = this.build(getParamsMap(
+    BuildResult result = this.build(Helper.getParamsMap(
       "url", "https://sandbox.senx.io/api/v0/exec",
       "source", Paths.get("src", "test", "resources", "macros").toFile().getCanonicalPath(),
       "dest", new File(testProjectDir, "doc").getCanonicalPath(),
@@ -163,7 +164,7 @@ public class TestDoc extends AbstractTests {
   @Test
   @DisplayName("wfDoc pdf output format")
   public void testGenerateDocPDF() throws IOException {
-    BuildResult result = this.build(getParamsMap(
+    BuildResult result = this.build(Helper.getParamsMap(
       "url", "https://sandbox.senx.io/api/v0/exec",
       "source", Paths.get("src", "test", "resources", "macros").toFile().getCanonicalPath(),
       "dest", new File(testProjectDir, "doc").getCanonicalPath(),
@@ -186,7 +187,7 @@ public class TestDoc extends AbstractTests {
   @Test
   @DisplayName("wfDoc without macroDir")
   public void testGenerateDocWOMacroDir() throws IOException {
-    BuildResult result = this.build(getParamsMap(
+    BuildResult result = this.build(Helper.getParamsMap(
       "url", "https://sandbox.senx.io/api/v0/exec",
       "source", Paths.get("src", "test", "resources", "macros").toFile().getCanonicalPath(),
       "dest", new File(testProjectDir, "doc").getCanonicalPath()

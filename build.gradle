@@ -1,5 +1,3 @@
-import java.nio.file.Paths
-
 plugins {
     id 'io.warp10.warpfleet-gradle-plugin' // version '1.0-SNAPSHOT'
 }
@@ -8,10 +6,12 @@ warpfleet {
     group = 'io.warp10'
     artifact = 'warp10-ext-barcode'
 
-    url = "https://sandbox.senx.io/api/v0/exec"
-    source = "warpfleet-gradle-plugin/src/test/resources/macros"
+    url = "https://warp.senx.io/standalone/api/v0/exec"
+    source = "/opt/tmp"
     dest = "./doc"
-    macroDir = "senx"
-    format = "html"
+    macroDir = "doc"
+    format = "json"
+    gpgKeyId = "301800F812A1D6B68972E5D0B82E4344AAD46904"
+    wfJson = "/home/xavier/workspace/warp10-warpstudio-plugin/wf.json"
+    vers = "2.0.9"
 }
-

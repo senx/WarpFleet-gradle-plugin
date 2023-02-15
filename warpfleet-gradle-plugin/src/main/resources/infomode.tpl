@@ -1,3 +1,4 @@
+{{macro}}
 <%
   'inputname' STORE
   '.*[!%25&\\(\\)\\*+/<=>\\[\\]^\\{\\|\\}~].*' MATCHER 'ForbiddenCharacters' STORE
@@ -20,7 +21,6 @@
   %>
   IFTE
 %> 'mantranslate' STORE
-{{macro}}
 {} 'data' STORE
 <%
  <% $macro EVAL %> <% %> <% %> TRY DUP

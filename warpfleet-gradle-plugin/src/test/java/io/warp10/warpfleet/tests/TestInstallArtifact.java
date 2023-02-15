@@ -16,6 +16,7 @@
 
 package io.warp10.warpfleet.tests;
 
+import io.warp10.warpfleet.utils.Helper;
 import org.gradle.testkit.runner.BuildResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -54,7 +55,7 @@ public class TestInstallArtifact extends AbstractTests {
   @Test
   @DisplayName("wfInstall")
   public void testInstallArtifact() throws IOException {
-    BuildResult result = this.build(getParamsMap(
+    BuildResult result = this.build(Helper.getParamsMap(
       "group", "io.warp10",
       "artifact", "warp10-ext-barcode",
       "warp10Dir", Paths.get(testProjectDir.getCanonicalPath(), "warp10").toFile().getCanonicalPath()
@@ -74,7 +75,7 @@ public class TestInstallArtifact extends AbstractTests {
   @Test
   @DisplayName("wfInstall with latest as version")
   public void testInstallLatestArtifact() throws IOException {
-    BuildResult result = this.build(getParamsMap(
+    BuildResult result = this.build(Helper.getParamsMap(
       "group", "io.warp10",
       "artifact", "warp10-ext-barcode",
       "vers", "latest",
@@ -95,7 +96,7 @@ public class TestInstallArtifact extends AbstractTests {
   @Test
   @DisplayName("wfInstall with a specific version")
   public void testInstallArtifactSpecificVersion() throws IOException {
-    BuildResult result = this.build(getParamsMap(
+    BuildResult result = this.build(Helper.getParamsMap(
       "group", "io.warp10",
       "artifact", "warp10-ext-barcode",
       "vers", "1.0.2-uberjar",
@@ -117,7 +118,7 @@ public class TestInstallArtifact extends AbstractTests {
   @Test
   @DisplayName("wfInstall multiple packages")
   public void testInstallMultiArtifacts() throws IOException {
-    BuildResult result = this.build(getParamsMap(
+    BuildResult result = this.build(Helper.getParamsMap(
       "packages", "io.warp10:warp10-plugin-warpstudio:2.0.9,io.warp10:warp10-ext-barcode:latest,io.warp10:warp10-ext-jdbc",
       "warp10Dir", Paths.get(testProjectDir.getCanonicalPath(), "warp10").toFile().getCanonicalPath()
     ), TASK);

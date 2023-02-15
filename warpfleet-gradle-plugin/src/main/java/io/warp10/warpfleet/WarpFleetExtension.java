@@ -106,4 +106,32 @@ public abstract class WarpFleetExtension {
    * @return the macro dir
    */
   abstract  public Property<String> getMacroDir();
+
+  /**
+   * Gets repo url.
+   *
+   * @return the repo url
+   */
+  abstract public Property<String> getRepoUrl();
+
+  /**
+   * Gets gpg key id.
+   *
+   * @return the gpg key id
+   */
+  abstract public Property<String> getGpgKeyId();
+
+  /**
+   * Gets gpg arg.
+   *
+   * @return the gpg arg
+   */
+  abstract public Property<String> getGpgArg();
+
+  /**
+   * Gets wf json.
+   *
+   * @return the wf json
+   */
+  abstract public Property<String> getWfJson();
 }

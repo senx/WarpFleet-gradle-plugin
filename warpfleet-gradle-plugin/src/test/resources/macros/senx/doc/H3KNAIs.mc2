@@ -1,0 +1,43 @@
+<%
+  {
+    'name' 'HEX->'
+    'since' '1.0.0'
+    'deprecated' ''
+    'deleted' ''
+    'version' 'all'
+    'tags' [ 'conversion' ]
+    'desc' 
+      <'
+Converts a hexadecimal string representation into a bytes array.
+Bytes array cannot be represented on the stack.
+      '>
+    'sig' [ 
+      [ [ 'input:STRING' ]  [ 'output:BYTES' ] ] 
+    ]
+    'params' {
+      'input' 'A valid hexadecimal string.'
+      'output' 'Bytes Array from input. Seen as null on the stack.'
+    }
+    'related' [ 'BYTES->' '->BYTES' ]
+    'examples' [ 
+      <'
+
+'6461c39f2069737420736368c3b66e' HEX->  //bytes array
+'utf-8' BYTES-> //bytes array representation
+
+
+      '>
+    ]
+    'conf' [ ]
+  } INFO
+
+  HEX->
+%>
+'macro' STORE
+// Unit tests
+
+'c3a9ceb5D09FE2BEA5EAAA8B' HEX->  'utf-8' BYTES->
+'éεП⾥ꪋ'  == ASSERT
+
+
+$macro

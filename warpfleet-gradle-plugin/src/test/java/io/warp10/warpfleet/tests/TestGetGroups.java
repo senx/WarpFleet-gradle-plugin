@@ -14,7 +14,10 @@
  *   limitations under the License.
  */
 
-package io.warp10.warpfleet.tests;import org.gradle.testkit.runner.BuildResult;
+package io.warp10.warpfleet.tests;
+
+import io.warp10.warpfleet.utils.Helper;
+import org.gradle.testkit.runner.BuildResult;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -39,7 +42,7 @@ public class TestGetGroups extends AbstractTests {
   @Test
   @DisplayName("wfGetGroups")
   public void testWfGetGroups() throws IOException {
-    BuildResult result = this.build(getParamsMap(), TASK);
+    BuildResult result = this.build(Helper.getParamsMap(), TASK);
     assertTrue(result.getOutput().contains("io.warp10"));
     assertTrue(result.getOutput().contains("io.senx"));
     assertEquals(SUCCESS, Objects.requireNonNull(result.task(":" + TASK)).getOutcome());

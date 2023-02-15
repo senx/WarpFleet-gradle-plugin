@@ -22,6 +22,7 @@ import io.warp10.warpfleet.actions.GetArtifacts;
 import io.warp10.warpfleet.actions.GetGroups;
 import io.warp10.warpfleet.actions.GetVersions;
 import io.warp10.warpfleet.actions.InstallArtifact;
+import io.warp10.warpfleet.actions.Publish;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 
@@ -45,18 +46,18 @@ public class WFPlugin implements Plugin<Project> {
 
     project.getTasks().register("wfGetArtifacts", GetArtifacts.class, t -> t.getWFGroup().set(ext.getGroup()));
 
-    project.getTasks().register("wfGetVersions", GetVersions.class, t-> {
+    project.getTasks().register("wfGetVersions", GetVersions.class, t -> {
       t.getWFGroup().set(ext.getGroup());
       t.getWFArtifact().set(ext.getArtifact());
     });
 
-    project.getTasks().register("wfGetArtifactInfo", GetArtifactInfo.class, t-> {
+    project.getTasks().register("wfGetArtifactInfo", GetArtifactInfo.class, t -> {
       t.getWFGroup().set(ext.getGroup());
       t.getWFArtifact().set(ext.getArtifact());
       t.getWFVersion().set(ext.getVers());
     });
 
-    project.getTasks().register("wfInstall", InstallArtifact.class, t-> {
+    project.getTasks().register("wfInstall", InstallArtifact.class, t -> {
       t.getWfPackages().set(ext.getPackages());
       t.getWfRepoURL().set(ext.getRepoURL());
       t.getWfClassifier().set(ext.getClassifier());
@@ -72,6 +73,14 @@ public class WFPlugin implements Plugin<Project> {
       t.getWfDest().set(ext.getDest());
       t.getWfUrl().set(ext.getUrl());
       t.getWfSource().set(ext.getSource());
+    });
+
+    project.getTasks().register("wfPublish", Publish.class, t -> {
+      t.getRepoUrl().set(ext.getRepoUrl());
+      t.getVers().set(ext.getVers());
+      t.getGpgKeyId().set(ext.getGpgKeyId());
+      t.getGpgArg().set(ext.getGpgArg());
+      t.getWFJson().set(ext.getWfJson());
     });
   }
 }

@@ -9,7 +9,6 @@ plugins {
     id 'net.nemerosa.versioning' version "2.15.1"
     id 'io.codearte.nexus-staging' version "0.30.0"
     id "pl.droidsonroids.jacoco.testkit" version "1.0.9"
-
 }
 versioning {
     gitRepoRootDir = '.'

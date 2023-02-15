@@ -28,12 +28,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The type Helper.
  */
 public class Helper {
-  private static final String WF_URL = "https://warpfleet.senx.io/api";
+  public static final String WF_URL = "https://warpfleet.senx.io";
 
   /**
    * Instantiates a new Helper.
@@ -47,7 +51,7 @@ public class Helper {
    * @return the groups
    */
   public static JSONArray getGroups() {
-    return Unirest.get(Helper.WF_URL + "/")
+    return Unirest.get(Helper.WF_URL + "/api/")
       .header("accept", "application/json")
       .asJson()
       .ifFailure(Helper::processHTTPError)
@@ -64,7 +68,7 @@ public class Helper {
    * @return the versions
    */
   public static JSONObject getVersions(String group, String artifact) {
-    return Unirest.get(Helper.WF_URL + "/{group}/{artifact}")
+    return Unirest.get(Helper.WF_URL + "/api/{group}/{artifact}")
       .routeParam("group", group)
       .routeParam("artifact", artifact)
       .header("accept", "application/json")
@@ -93,7 +97,7 @@ public class Helper {
    * @return the artifact info
    */
   public static JSONObject getArtifactInfo(String group, String artifact, String version) {
-    return Unirest.get(Helper.WF_URL + "/{group}/{artifact}/{version}")
+    return Unirest.get(Helper.WF_URL + "/api/{group}/{artifact}/{version}")
       .routeParam("group", group)
       .routeParam("artifact", artifact)
       .routeParam("version", version)
@@ -111,7 +115,7 @@ public class Helper {
    * @return the artifacts
    */
   public static JSONArray getArtifacts(String group) {
-    return Unirest.get(Helper.WF_URL + "/{group}")
+    return Unirest.get(Helper.WF_URL + "/api/{group}")
       .routeParam("group", group)
       .header("accept", "application/json")
       .asJson()
@@ -129,7 +133,7 @@ public class Helper {
    * @return the latest
    */
   public static JSONObject getLatest(String group, String artifact) {
-    return Unirest.get(Helper.WF_URL + "/{group}/{artifact}")
+    return Unirest.get(Helper.WF_URL + "/api/{group}/{artifact}")
       .routeParam("group", group)
       .routeParam("artifact", artifact)
       .header("accept", "application/json")
@@ -140,37 +144,65 @@ public class Helper {
   }
 
   /**
-   * Exec.
+   * Exec cmd.
    *
-   * @param command the command
-   * @throws InterruptedException the interrupted exception
+   * @param cmd the cmd
    * @throws IOException          the io exception
+   * @throws InterruptedException the interrupted exception
    */
-  public static void exec(String[] command) throws InterruptedException, IOException {
-    Runtime rt = Runtime.getRuntime();
-    Process pr = rt.exec(command);
-    new Thread(() -> {
-      BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+  public static void execCmd(String[] cmd) throws IOException, InterruptedException {
+    Helper.execCmd(Arrays.asList(cmd));
+  }
+
+  /**
+   * Exec cmd.
+   *
+   * @param cmd the cmd
+   * @throws IOException          the io exception
+   * @throws InterruptedException the interrupted exception
+   */
+  public static void execCmd(String cmd) throws IOException, InterruptedException {
+    Helper.execCmd(cmd.split(" "));
+  }
+
+  /**
+   * Exec cmd.
+   *
+   * @param cmd the cmd
+   * @throws IOException          the io exception
+   * @throws InterruptedException the interrupted exception
+   */
+  public static void execCmd(List<String> cmd) throws IOException, InterruptedException {
+    final ProcessBuilder p = new ProcessBuilder(cmd);
+    p.redirectInput(ProcessBuilder.Redirect.PIPE);
+    p.redirectOutput(ProcessBuilder.Redirect.PIPE);
+    p.redirectError(ProcessBuilder.Redirect.PIPE);
+
+    Process process;
+    try {
+      process = p.start();
+    } catch (final IOException ex) {
+      throw new RuntimeException("Failed to run command: " + cmd.get(0), ex);
+    }
+
+    try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
       String line;
-      try {
-        while ((line = input.readLine()) != null) {
-          Logger.messageInfo(line);
-        }
-      } catch (IOException e) {
-        e.printStackTrace();
+      while ((line = reader.readLine()) != null) {
+        Logger.messageInfo(line);
       }
-    }).start();
-    new Thread(() -> {
-      BufferedReader input = new BufferedReader(new InputStreamReader(pr.getErrorStream()));
+    }
+
+    try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
       String line;
-      try {
-        while ((line = input.readLine()) != null)
-          Logger.messageError(Logger.ANSI_RED + line + Logger.ANSI_RESET);
-      } catch (IOException e) {
-        e.printStackTrace();
+      while ((line = reader.readLine()) != null) {
+        Logger.messageError(Logger.ANSI_RED + line + Logger.ANSI_RESET);
       }
-    }).start();
-    pr.waitFor();
+    }
+    process.waitFor();
+    if (process.exitValue() != 0) {
+      throw new RuntimeException("Failed to run command: " + cmd.get(0));
+    }
+
   }
 
   /**
@@ -180,10 +212,16 @@ public class Helper {
    */
   public static void processHTTPError(HttpResponse<?> response) {
     Logger.messageError("Oh No! Status: " + response.getStatus());
+    Logger.messageError(response.getStatusText());
+    response.getHeaders()
+      .all().stream()
+      .filter(h -> h.getName().contains("X-Warp10"))
+      .forEach(h -> Logger.messageError(h.getName() + ": " + h.getValue()));
     response.getParsingError().ifPresent(e -> {
       Logger.messageError("Parsing Exception: " + e.getMessage());
       Logger.messageError("Original body: " + e.getOriginalBody());
     });
+    throw new RuntimeException("An HTTP error occurs: " + response.getStatus() + " " + response.getStatusText());
   }
 
   /**
@@ -225,7 +263,7 @@ public class Helper {
       }
     }
     // Get macro
-    String macroContent = Unirest.get(Helper.WF_URL + "/{group}/{artifact}/{version}/{macro}")
+    String macroContent = Unirest.get(Helper.WF_URL + "/api/{group}/{artifact}/{version}/{macro}")
       .routeParam("group", group)
       .routeParam("artifact", artifact)
       .routeParam("version", version)
@@ -248,7 +286,7 @@ public class Helper {
   public static String getFileAsString(final String fileName, Class<?> clazz) throws IOException, IllegalArgumentException {
     InputStream is = Helper.getFileAsIOStream(fileName, clazz);
     StringBuilder sb = new StringBuilder();
-    try (InputStreamReader isr = new InputStreamReader(is);
+    try (InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
          BufferedReader br = new BufferedReader(isr)) {
       String line;
       while ((line = br.readLine()) != null) {
@@ -272,5 +310,37 @@ public class Helper {
       throw new IllegalArgumentException(fileName + " is not found");
     }
     return ioStream;
+  }
+
+  /**
+   * Gets params map.
+   *
+   * @param data the data
+   * @return the params map
+   */
+  public static Map<String, String> getParamsMap(String... data) {
+    Map<String, String> result = new HashMap<>();
+
+    if (data.length % 2 != 0) {
+      throw new IllegalArgumentException("Odd number of arguments");
+    }
+
+    String key = null;
+    int step = -1;
+
+    for (String value : data) {
+      step++;
+      switch (step % 2) {
+        case 0:
+          if (value == null)
+            throw new IllegalArgumentException("Null key value");
+          key = value;
+          continue;
+        case 1:
+          result.put(key, value);
+          break;
+      }
+    }
+    return result;
   }
 }

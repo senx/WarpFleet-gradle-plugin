@@ -27,7 +27,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -120,39 +119,6 @@ abstract public class AbstractTests {
     params.forEach((key, value) -> buildFileContent.append("\t").append(key).append(" = '").append(value).append("'\n"));
     buildFileContent.append("}\n");
     this.writeFile(buildFile, buildFileContent.toString());
-  }
-
-  /**
-   * Gets params map.
-   *
-   * @param data the data
-   * @return the params map
-   */
-  public static Map<String, String> getParamsMap(String... data) {
-    Map<String, String> result = new HashMap<>();
-
-    if (data.length % 2 != 0) {
-      throw new IllegalArgumentException("Odd number of arguments");
-    }
-
-    String key = null;
-    int step = -1;
-
-    for (String value : data) {
-      step++;
-      switch (step % 2) {
-        case 0:
-          if (value == null)
-            throw new IllegalArgumentException("Null key value");
-          key = value;
-          continue;
-        case 1:
-          result.put(key, value);
-          break;
-      }
-    }
-
-    return result;
   }
 
   /**
