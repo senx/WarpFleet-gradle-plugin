@@ -47,7 +47,7 @@ abstract public class Publish extends DefaultTask {
   @Input
   @Optional
   @Option(option = "repoUrl", description = "Maven repository URL")
-  abstract public Property<String> getRepoUrl();
+  abstract public Property<String> getWFRepoUrl();
 
   /**
    * Gets vers.
@@ -57,7 +57,7 @@ abstract public class Publish extends DefaultTask {
   @Input
   @Optional
   @Option(option = "vers", description = "Artifact version to publish")
-  abstract public Property<String> getVers();
+  abstract public Property<String> getWfVersion();
 
   /**
    * Gets gpg key id.
@@ -67,7 +67,7 @@ abstract public class Publish extends DefaultTask {
   @Input
   @Optional
   @Option(option = "gpgKeyId", description = "GPG Key Id")
-  abstract public Property<String> getGpgKeyId();
+  abstract public Property<String> getWFGpgKeyId();
 
   /**
    * Gets gpg arg.
@@ -77,7 +77,7 @@ abstract public class Publish extends DefaultTask {
   @Input
   @Optional
   @Option(option = "gpgArg", description = "GPG gpgArg")
-  abstract public Property<String> getGpgArg();
+  abstract public Property<String> getWFGpgArg();
 
   /**
    * Gets wf json.
@@ -111,11 +111,11 @@ abstract public class Publish extends DefaultTask {
     }
     JSONObject conf = new JSONObject(FileUtils.readFileToString(wfJson, StandardCharsets.UTF_8));
     conf.put("ts", System.currentTimeMillis());
-    if (null != this.getRepoUrl().getOrNull()) {
-      conf.put("repoUrl", this.getRepoUrl().get());
+    if (null != this.getWFRepoUrl().getOrNull()) {
+      conf.put("repoUrl", this.getWFRepoUrl().get());
     }
-    if (null != this.getVers().getOrNull()) {
-      conf.put("version", this.getVers().get());
+    if (null != this.getWfVersion().getOrNull()) {
+      conf.put("version", this.getWfVersion().get());
     }
 
     Logger.messageInfo("About to publish: " +
@@ -125,7 +125,7 @@ abstract public class Publish extends DefaultTask {
     );
 
     List<String> missingFiles = new ArrayList<>();
-    if (!new File("README.md").exists()) {
+    if (!new File(wfJson.getParentFile().getCanonicalPath() + File.separator  + "README.md").exists()) {
       missingFiles.add("README.md");
     }
 
@@ -137,7 +137,7 @@ abstract public class Publish extends DefaultTask {
     // GPG signature
     File tmpConf = new File(wfJson.getCanonicalPath() + ".tmp");
     FileUtils.write(tmpConf, conf.toString(2), StandardCharsets.UTF_8);
-    Helper.signArtefact(tmpConf, this.getGpgKeyId().getOrNull(), this.getGpgArg().getOrNull());
+    Helper.signArtefact(tmpConf, this.getWFGpgKeyId().getOrNull(), this.getWFGpgArg().getOrNull());
 
     // Publication
     Logger.messageInfo("Publishing");

@@ -134,4 +134,11 @@ public abstract class WarpFleetExtension {
    * @return the wf json
    */
   abstract public Property<String> getWfJson();
+  
+  /**
+   * Gets force.
+   *
+   * @return the force
+   */
+  abstract public Property<Boolean> getForce();
 }

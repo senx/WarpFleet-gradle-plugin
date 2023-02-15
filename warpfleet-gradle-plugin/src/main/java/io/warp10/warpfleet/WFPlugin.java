@@ -77,19 +77,20 @@ public class WFPlugin implements Plugin<Project> {
     });
 
     project.getTasks().register("wfPublish", Publish.class, t -> {
-      t.getRepoUrl().set(ext.getRepoUrl());
-      t.getVers().set(ext.getVers());
-      t.getGpgKeyId().set(ext.getGpgKeyId());
-      t.getGpgArg().set(ext.getGpgArg());
+      t.getWFRepoUrl().set(ext.getRepoUrl());
+      t.getWfVersion().set(ext.getVers());
+      t.getWFGpgKeyId().set(ext.getGpgKeyId());
+      t.getWFGpgArg().set(ext.getGpgArg());
       t.getWFJson().set(ext.getWfJson());
     });
 
     project.getTasks().register("wfUnPublish", UnPublish.class, t -> {
-      t.getRepoUrl().set(ext.getRepoUrl());
-      t.getVers().set(ext.getVers());
-      t.getGpgKeyId().set(ext.getGpgKeyId());
-      t.getGpgArg().set(ext.getGpgArg());
+      t.getWFRepoUrl().set(ext.getRepoUrl());
+      t.getWFVersion().set(ext.getVers());
+      t.getWFGpgKeyId().set(ext.getGpgKeyId());
+      t.getWFGpgArg().set(ext.getGpgArg());
       t.getWFJson().set(ext.getWfJson());
+      t.getWFForce().set(ext.getForce());
     });
   }
 }

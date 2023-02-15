@@ -33,6 +33,7 @@ import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.options.Option;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -127,9 +128,12 @@ abstract public class InstallArtifact extends DefaultTask {
 
   /**
    * Install artifact.
+   *
+   * @throws IOException          the io exception
+   * @throws InterruptedException the interrupted exception
    */
   @TaskAction
-  public void installArtifact() {
+  public void installArtifact() throws IOException, InterruptedException {
     List<PackageInfo> packages = new ArrayList<>();
 
     try {
@@ -315,6 +319,7 @@ abstract public class InstallArtifact extends DefaultTask {
       }
     } catch (Throwable e) {
       Logger.messageError(e.getMessage());
+      throw e;
     }
   }
 }

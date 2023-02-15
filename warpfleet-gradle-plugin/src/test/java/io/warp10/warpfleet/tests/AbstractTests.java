@@ -116,9 +116,17 @@ abstract public class AbstractTests {
       .append("plugins { id \"io.warp10.warpfleet-gradle-plugin\" }\n")
       .append("warpfleet {\n");
 
-    params.forEach((key, value) -> buildFileContent.append("\t").append(key).append(" = '").append(value).append("'\n"));
+    params.forEach((key, value) -> buildFileContent.append("\t").append(key).append(" = ").append(this.format(value)).append("\n"));
     buildFileContent.append("}\n");
     this.writeFile(buildFile, buildFileContent.toString());
+  }
+
+  private String format(String value) {
+    if ("true".equalsIgnoreCase(value) || "false".equalsIgnoreCase(value)) {
+      return value;
+    } else {
+      return "'" + value + "'";
+    }
   }
 
   /**

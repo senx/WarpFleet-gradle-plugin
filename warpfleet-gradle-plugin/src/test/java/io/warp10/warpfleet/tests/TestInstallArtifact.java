@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Objects;
 
+import static org.gradle.testkit.runner.TaskOutcome.FAILED;
 import static org.gradle.testkit.runner.TaskOutcome.SUCCESS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -135,4 +136,85 @@ public class TestInstallArtifact extends AbstractTests {
     assertEquals(SUCCESS, Objects.requireNonNull(result.task(":" + TASK)).getOutcome());
   }
 
+  /**
+   * Test install multi artifacts wrong syntax.
+   *
+   * @throws IOException the io exception
+   */
+  @Test
+  @DisplayName("wfInstall multiple packages wrong syntax")
+  public void testInstallMultiArtifactsWrongSyntax() throws IOException {
+    BuildResult result = this.buildAndFail(Helper.getParamsMap(
+      "packages", "io.warp10:warp10-plugin-warpstudio:,io.warp10warp10-ext-barcodelatest",
+      "warp10Dir", Paths.get(testProjectDir.getCanonicalPath(), "warp10").toFile().getCanonicalPath()
+    ), TASK);
+    assertEquals(FAILED, Objects.requireNonNull(result.task(":" + TASK)).getOutcome());
+    assertTrue(result.getOutput().contains("Bad syntax"));
+  }
+
+  /**
+   * Test install multi artifacts w classifier.
+   *
+   * @throws IOException the io exception
+   */
+  @Test
+  @DisplayName("wfInstall multiple packages using classifier")
+  public void testInstallMultiArtifactsWClassifier() throws IOException {
+    BuildResult result = this.build(Helper.getParamsMap(
+      "packages", "io.warp10:warp10-plugin-warpstudio:2.0.9:uberjar",
+      "warp10Dir", Paths.get(testProjectDir.getCanonicalPath(), "warp10").toFile().getCanonicalPath()
+    ), TASK);
+    assertTrue(result.getOutput().contains("successfully deployed"));
+    assertTrue(Paths.get(testProjectDir.getCanonicalPath(), "warp10", "etc", "conf.d", "99-io.warp10-warp10-plugin-warpstudio.conf").toFile().exists());
+    assertTrue(result.getOutput().contains("99-io.warp10-warp10-plugin-warpstudio.conf"));
+    assertTrue(Paths.get(testProjectDir.getCanonicalPath(), "warp10", "lib", "io.warp10-warp10-plugin-warpstudio-2.0.9.jar").toFile().exists());
+    assertEquals(SUCCESS, Objects.requireNonNull(result.task(":" + TASK)).getOutcome());
+  }
+
+  /**
+   * Test install wo artifact.
+   *
+   * @throws IOException the io exception
+   */
+  @Test
+  @DisplayName("wfInstall without artifact")
+  public void testInstallWOArtifact() throws IOException {
+    BuildResult result = this.buildAndFail(Helper.getParamsMap(
+      "group", "io.warp10",
+      "vers", "latest",
+      "warp10Dir", Paths.get(testProjectDir.getCanonicalPath(), "warp10").toFile().getCanonicalPath()
+    ), TASK);
+    assertEquals(FAILED, Objects.requireNonNull(result.task(":" + TASK)).getOutcome());
+  }
+
+  /**
+   * Test install wo group.
+   *
+   * @throws IOException the io exception
+   */
+  @Test
+  @DisplayName("wfInstall without group")
+  public void testInstallWOGroup() throws IOException {
+    BuildResult result = this.buildAndFail(Helper.getParamsMap(
+      //"group", "io.warp10",
+      "artifact", "warp10-ext-barcode",
+      "warp10Dir", Paths.get(testProjectDir.getCanonicalPath(), "warp10").toFile().getCanonicalPath()
+    ), TASK);
+    assertEquals(FAILED, Objects.requireNonNull(result.task(":" + TASK)).getOutcome());
+  }
+
+  /**
+   * Test install wo W10 dir.
+   *
+   * @throws IOException the io exception
+   */
+  @Test
+  @DisplayName("wfInstall without warp10Dir")
+  public void testInstallWOW10Dir() throws IOException {
+    BuildResult result = this.buildAndFail(Helper.getParamsMap(
+      "group", "io.warp10",
+      "artifact", "warp10-ext-barcode"
+    ), TASK);
+    assertEquals(FAILED, Objects.requireNonNull(result.task(":" + TASK)).getOutcome());
+  }
 }
