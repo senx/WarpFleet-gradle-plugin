@@ -20,6 +20,30 @@ buildscript{
 
 ## Usage
 
+### In a `build.gradle`  
+
+````groovy
+apply plugin: 'io.warp10.warpfleet-gradle-plugin'
+ 
+buildscript{
+  repositories {
+      mavenCentral()
+      mavenLocal() 
+      dependencies{
+        classpath 'io.warp10:warpfleet-gradle-plugin:0.0.1-af81395'
+      }
+  }  
+}
+
+warpfleet {
+    url = "https://sandbox.senx.io/api/v0/exec" 
+    source = "/opt/tmp" 
+    dest = "./doc" 
+    macroDir = "doc"
+    format = "json"
+}
+````
+
 ### Available tasks
 
 ```bash
