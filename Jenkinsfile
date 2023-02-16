@@ -102,7 +102,7 @@ pipeline {
             message 'Should we deploy to Maven Central?'
           }
           steps {
-            sh "${GRADLE_CMD} -p warpfleet-gradle-plugin clean jar sourcesJar javadocJar publishMavenPublicationToMavenRepository -x test -x shadowJar"
+            sh "${GRADLE_CMD} -p warpfleet-gradle-plugin clean jar sourcesJar javadocJar publishMavenPublicationToMavenRepository -x test"
             sh "${GRADLE_CMD} -p warpfleet-gradle-plugin closeRepository"
             sh "${GRADLE_CMD} -p warpfleet-gradle-plugin releaseRepository"
             script {
