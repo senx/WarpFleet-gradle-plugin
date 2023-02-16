@@ -127,3 +127,16 @@ You should use:
         --macroDir=path \                           # root path of your macros
         --format=json                               # json by default (could be html, pdf or md)
 
+### *wfPublish* - Publish an artifact against WarpFleet
+
+    ./gradlew -q wfPublish \
+        --gpgKeyId=BDxxx0A \                        # Optional GPG Key Id
+        --vers=1.2.3                                # Optional version overrides version in wf.json
+        --wfJson=/path/to/wf.json                   # where wf.json is located
+
+### *wfUnPublish* - UnPublish an artifact against WarpFleet
+
+    ./gradlew -q wfUnPublish \
+        --gpgKeyId=BDxxx0A \                        # Optional GPG Key Id
+        --vers=1.2.3                                # Optional version overrides version in wf.json
+        --wfJson=/path/to/wf.json                   # where wf.json is located
