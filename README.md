@@ -30,7 +30,7 @@ buildscript{
       mavenCentral()
       mavenLocal() 
       dependencies{
-        classpath 'io.warp10:warpfleet-gradle-plugin:0.0.1-af81395'
+        classpath 'io.warp10:warpfleet-gradle-plugin:0.0.3k'
       }
   }  
 }
@@ -53,28 +53,31 @@ $ ./gradlew -q tasks --group WarpFleet
 
 WarpFleet tasks
 ---------------
-getArtifactInfo - Get Artifact info
-getArtifacts - Get list of available artifacts
-getGroups - Get list of available groups
-getVersions - Get list of available artifact's versions
-installArtifact - Install Artifact
+wfDoc - Generates documentation files against a Warp 10 instance thanks to the INFOMODE.
+wfGetArtifactInfo - Get Artifact info
+wfGetArtifacts - Get list of available artifacts
+wfGetGroups - Get list of available groups
+wfGetVersions - Get list of available artifact's versions
+wfInstall - Install Artifact
+wfPublish - Publishes a plugin, macro or extension against WarpFleet
+wfUnPublish - Unpublishes a plugin, macro or extension against WarpFleet
 
 ...
 ```
 
-### *getGroups* - Get list of available groups
+### *wfGetGroups* - Get list of available groups
 
 ```bash
-$ ./gradlew -q getGroups 
+$ ./gradlew -q wfGetGroups 
 - io.senx
 - io.warp10
 ...
 ```
 
-### *getArtifacts* - Get list of available artifacts
+### *wfGetArtifacts* - Get list of available artifacts
 
 ```bash
-$ ./gradlew -q getArtifacts --group=io.warp10
+$ ./gradlew -q wfGetArtifacts --group=io.warp10
 - io.warp10:warp10-ext-arrow:2.0.3-uberjar (Conversions to and from Apache Arrow streaming format)
 - io.warp10:warp10-ext-barcode:1.0.2-uberjar (WarpScript™ Barcode Extension)
 - io.warp10:warp10-ext-flows:0.1.1-uberjar (FLoWS WarpScript Extension)
@@ -85,10 +88,10 @@ $ ./gradlew -q getArtifacts --group=io.warp10
 ```
 
 
-### *getVersions* - Get list of available artifact's versions
+### *wfGetVersions* - Get list of available artifact's versions
 
 ```bash
-$ ./gradlew -q getVersions --group=io.warp10 --artifact=warp10-plugin-warpstudio
+$ ./gradlew -q wfGetVersions --group=io.warp10 --artifact=warp10-plugin-warpstudio
 - Name:            io.warp10:warp10-plugin-warpstudio
 - Description:     WarpStudio, the WarpScript editor
 - Latest version:  2.0.6
@@ -100,14 +103,14 @@ $ ./gradlew -q getVersions --group=io.warp10 --artifact=warp10-plugin-warpstudio
     - 2.0.2
 ```
 
-### *getArtifactInfo* - Get Artifact info
+### *wfGetArtifactInfo* - Get Artifact info
 
 ```bash
-$ ./gradlew -q getArtifactInfo --group=io.warp10 --artifact=warp10-plugin-warpstudio --vers=2.0.3
+$ ./gradlew -q wfGetArtifactInfo --group=io.warp10 --artifact=warp10-plugin-warpstudio --vers=2.0.3
 - io.warp10:warp10-plugin-warpstudio:2.0.3 (WarpStudio, the WarpScript editor)
 ```
 
-### *installArtifact* - Install Artifact
+### *wfInstall* - Install Artifact
 
 Single Artifact installation
 
@@ -122,7 +125,7 @@ With the packages syntax
     $ ./gradlew -q wfInstall --packages=io.warp10:warp10-plugin-warpstudio:latest --dest=/opt/warp10
     $ ./gradlew -q wfInstall --packages=io.warp10:warp10-plugin-warpstudio --dest=/opt/warp10
 
-Multiple artefacts
+Multiple artifacts
 
     $ ./gradlew -q wfInstall \
         --packages=io.warp10:warp10-plugin-warpstudio:latest,io.warp10:warp10-ext-barcode \
