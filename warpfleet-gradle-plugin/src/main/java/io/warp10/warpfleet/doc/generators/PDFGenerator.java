@@ -59,7 +59,8 @@ public class PDFGenerator extends HTMLGenerator {
     }
     PdfConverterExtension.exportToPdf(
       dest.getCanonicalPath() + File.separator + "index.pdf",
-      this.wrapHTML(String.join("\n", pages), "Index"), "", OPTIONS);
+      this.wrapHTML(String.join("<div class=\"pagebreak\"></div>", pages), "Index"),
+      "", OPTIONS);
     return index;
   }
 }

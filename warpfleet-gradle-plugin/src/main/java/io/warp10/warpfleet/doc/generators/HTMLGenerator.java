@@ -20,10 +20,12 @@ import com.vladsch.flexmark.ext.attributes.AttributesExtension;
 import com.vladsch.flexmark.ext.autolink.AutolinkExtension;
 import com.vladsch.flexmark.ext.gitlab.GitLabExtension;
 import com.vladsch.flexmark.ext.tables.TablesExtension;
+import com.vladsch.flexmark.ext.toc.TocExtension;
 import com.vladsch.flexmark.ext.typographic.TypographicExtension;
 import com.vladsch.flexmark.ext.wikilink.WikiLinkExtension;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
+import com.vladsch.flexmark.pdf.converter.PdfConverterExtension;
 import com.vladsch.flexmark.util.data.DataHolder;
 import com.vladsch.flexmark.util.data.MutableDataSet;
 import io.warp10.warpfleet.utils.Helper;
@@ -59,6 +61,7 @@ public class HTMLGenerator extends MarkdownGenerator {
     .set(TablesExtension.DISCARD_EXTRA_COLUMNS, true)
     .set(TablesExtension.HEADER_SEPARATOR_COLUMN_MATCH, true)
     .set(WikiLinkExtension.IMAGE_LINKS, true)
+    .set(TocExtension.LIST_CLASS, PdfConverterExtension.DEFAULT_TOC_LIST_CLASS)
     .set(Parser.EXTENSIONS,
       Arrays.asList(
         TablesExtension.create(),

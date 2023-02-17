@@ -9,15 +9,15 @@ warpfleet {
     artifact = 'warp10-ext-barcode'
 
     url = "https://sandbox.senx.io/api/v0/exec"
-    source = "/opt/tmp"
+    source = "warpfleet-gradle-plugin/src/test/resources/macros"
     dest = "./doc"
-    macroDir = "doc"
-    format = "json"
+     macroDir = "."
+    format = "pdf"
     gpgKeyId = "301800F812A1D6B68972E5D0B82E4344AAD46904"
     wfJson = "/home/xavier/workspace/warp10-warpstudio-plugin/wf.json"
     vers = "1.0.42"
 
-    packages 'io.warp10:warp10-plugin-warpstudio:2.0.9,' +
+    packages = 'io.warp10:warp10-plugin-warpstudio:2.0.9,' +
             'io.warp10:warp10-ext-barcode:latest,' +
             'io.warp10:warp10-ext-jdbc'
 }
