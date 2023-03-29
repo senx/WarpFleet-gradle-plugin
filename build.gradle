@@ -10,12 +10,15 @@ warpfleet {
 
     url = "https://sandbox.senx.io/api/v0/exec"
     source = "warpfleet-gradle-plugin/src/test/resources/macros"
-    dest = "./doc"
+    // dest = "./doc"
+    dest = "/home/xavier/temp/"
      macroDir = "."
     format = "pdf"
     gpgKeyId = "301800F812A1D6B68972E5D0B82E4344AAD46904"
     wfJson = "/home/xavier/workspace/warp10-warpstudio-plugin/wf.json"
     vers = "1.0.42"
+
+    type = "ext"
 
     packages = 'io.warp10:warp10-plugin-warpstudio:2.0.9,' +
             'io.warp10:warp10-ext-barcode:latest,' +

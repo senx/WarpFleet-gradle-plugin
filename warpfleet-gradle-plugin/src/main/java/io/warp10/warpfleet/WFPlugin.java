@@ -21,6 +21,7 @@ import io.warp10.warpfleet.actions.GetArtifactInfo;
 import io.warp10.warpfleet.actions.GetArtifacts;
 import io.warp10.warpfleet.actions.GetGroups;
 import io.warp10.warpfleet.actions.GetVersions;
+import io.warp10.warpfleet.actions.InitModule;
 import io.warp10.warpfleet.actions.InstallArtifact;
 import io.warp10.warpfleet.actions.Publish;
 import io.warp10.warpfleet.actions.UnPublish;
@@ -91,6 +92,14 @@ public class WFPlugin implements Plugin<Project> {
       t.getWFGpgArg().set(ext.getGpgArg());
       t.getWFJson().set(ext.getWfJson());
       t.getWFForce().set(ext.getForce());
+    });
+
+    project.getTasks().register("wfInit", InitModule.class, t -> {
+      t.getWfVersion().set(ext.getVers());
+      t.getWfArtifact().set(ext.getArtifact());
+      t.getWfGroup().set(ext.getGroup());
+      t.getWfDest().set(ext.getDest());
+      t.getWfType().set(ext.getType());
     });
   }
 }

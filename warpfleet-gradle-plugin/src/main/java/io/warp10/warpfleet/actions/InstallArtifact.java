@@ -260,7 +260,7 @@ abstract public class InstallArtifact extends DefaultTask {
           .append("}");
         FileUtils.write(Helper.filePath(workDir.getAbsolutePath(), "build.gradle"), gradle.toString(), StandardCharsets.UTF_8);
         FileUtils.write(Helper.filePath(workDir.getAbsolutePath(), "settings.gradle"), "rootProject.name = 'newProjectName'", StandardCharsets.UTF_8);
-        Helper.execCmd("./gradlew getDeps -q -b " + Helper.path(workDir.getAbsolutePath(), "build.gradle"));
+        Helper.execCmd(null, "./gradlew getDeps -q -b " + Helper.path(workDir.getAbsolutePath(), "build.gradle"));
 
         // Copy all jars into Warp 10 lib folder
         Logger.messageInfo("Installing dependencies:");

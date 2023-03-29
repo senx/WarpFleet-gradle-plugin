@@ -105,7 +105,7 @@ public abstract class WarpFleetExtension {
    *
    * @return the macro dir
    */
-  abstract  public Property<String> getMacroDir();
+  abstract public Property<String> getMacroDir();
 
   /**
    * Gets repo url.
@@ -134,11 +134,18 @@ public abstract class WarpFleetExtension {
    * @return the wf json
    */
   abstract public Property<String> getWfJson();
-  
+
   /**
    * Gets force.
    *
    * @return the force
    */
   abstract public Property<Boolean> getForce();
+
+  /**
+   * Gets type.
+   *
+   * @return the type
+   */
+  abstract public Property<String> getType();
 }

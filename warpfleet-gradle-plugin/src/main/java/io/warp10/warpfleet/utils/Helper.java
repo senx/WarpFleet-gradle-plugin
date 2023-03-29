@@ -36,26 +36,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/**
- * The type Helper.
- */
 public class Helper {
-  /**
-   * The constant WF_URL.
-   */
   public static final String WF_URL = "https://warpfleet.senx.io";
 
-  /**
-   * Instantiates a new Helper.
-   */
   Helper() {
   }
 
-  /**
-   * Gets groups.
-   *
-   * @return the groups
-   */
   public static JSONArray getGroups() {
     return Unirest.get(Helper.WF_URL + "/api/")
       .header("accept", "application/json")
@@ -66,13 +52,6 @@ public class Helper {
       .getJSONArray("children");
   }
 
-  /**
-   * Gets versions.
-   *
-   * @param group    the group
-   * @param artifact the artifact
-   * @return the versions
-   */
   public static JSONObject getVersions(String group, String artifact) {
     return Unirest.get(Helper.WF_URL + "/api/{group}/{artifact}")
       .routeParam("group", group)
@@ -84,24 +63,10 @@ public class Helper {
       .getObject();
   }
 
-  /**
-   * Gets artifact info.
-   *
-   * @param pi the pi
-   * @return the artifact info
-   */
   public static JSONObject getArtifactInfo(PackageInfo pi) {
     return getArtifactInfo(pi.getGroup(), pi.getName(), pi.getVersion());
   }
 
-  /**
-   * Gets artifact info.
-   *
-   * @param group    the group
-   * @param artifact the artifact
-   * @param version  the version
-   * @return the artifact info
-   */
   public static JSONObject getArtifactInfo(String group, String artifact, String version) {
     return Unirest.get(Helper.WF_URL + "/api/{group}/{artifact}/{version}")
       .routeParam("group", group)
@@ -114,12 +79,6 @@ public class Helper {
       .getObject();
   }
 
-  /**
-   * Gets artifacts.
-   *
-   * @param group the group
-   * @return the artifacts
-   */
   public static JSONArray getArtifacts(String group) {
     return Unirest.get(Helper.WF_URL + "/api/{group}")
       .routeParam("group", group)
@@ -131,13 +90,6 @@ public class Helper {
       .getJSONArray("children");
   }
 
-  /**
-   * Gets latest.
-   *
-   * @param group    the group
-   * @param artifact the artifact
-   * @return the latest
-   */
   public static JSONObject getLatest(String group, String artifact) {
     return Unirest.get(Helper.WF_URL + "/api/{group}/{artifact}")
       .routeParam("group", group)
@@ -149,37 +101,20 @@ public class Helper {
       .getObject();
   }
 
-  /**
-   * Exec cmd.
-   *
-   * @param cmd the cmd
-   * @throws IOException          the io exception
-   * @throws InterruptedException the interrupted exception
-   */
-  public static void execCmd(String[] cmd) throws IOException, InterruptedException {
-    Helper.execCmd(Arrays.asList(cmd));
+  public static void execCmd(File workDir, String[] cmd) throws IOException, InterruptedException {
+    Helper.execCmd(workDir, Arrays.asList(cmd));
   }
 
-  /**
-   * Exec cmd.
-   *
-   * @param cmd the cmd
-   * @throws IOException          the io exception
-   * @throws InterruptedException the interrupted exception
-   */
-  public static void execCmd(String cmd) throws IOException, InterruptedException {
-    Helper.execCmd(cmd.split(" "));
+  public static void execCmd(File workDir, String cmd) throws IOException, InterruptedException {
+    System.out.println(cmd);
+    Helper.execCmd(workDir, cmd.split(" "));
   }
 
-  /**
-   * Exec cmd.
-   *
-   * @param cmd the cmd
-   * @throws IOException          the io exception
-   * @throws InterruptedException the interrupted exception
-   */
-  public static void execCmd(List<String> cmd) throws IOException, InterruptedException {
+  public static void execCmd(File workDir, List<String> cmd) throws IOException, InterruptedException {
     final ProcessBuilder p = new ProcessBuilder(cmd);
+    if(null != workDir) {
+      p.directory(workDir);
+    }
     p.redirectInput(ProcessBuilder.Redirect.PIPE);
     p.redirectOutput(ProcessBuilder.Redirect.PIPE);
     p.redirectError(ProcessBuilder.Redirect.PIPE);
@@ -211,11 +146,6 @@ public class Helper {
 
   }
 
-  /**
-   * Process http error.
-   *
-   * @param response the response
-   */
   public static void processHTTPError(HttpResponse<?> response) {
     Logger.messageError("Oh No! Status: " + response.getStatus());
     Logger.messageError(response.getStatusText());
@@ -230,36 +160,14 @@ public class Helper {
     throw new RuntimeException("An HTTP error occurs: " + response.getStatus() + " " + response.getStatusText());
   }
 
-  /**
-   * Path string.
-   *
-   * @param dirs the dirs
-   * @return the string
-   */
   public static String path(String... dirs) {
     return String.join(File.separator, dirs);
   }
 
-  /**
-   * File path file.
-   *
-   * @param dirs the dirs
-   * @return the file
-   */
   public static File filePath(String... dirs) {
     return new File(path(dirs));
   }
 
-  /**
-   * Gets macro.
-   *
-   * @param group     the group
-   * @param artifact  the artifact
-   * @param version   the version
-   * @param macro     the macro
-   * @param warp10Dir the warp 10 dir
-   * @throws IOException the io exception
-   */
   public static void getMacro(String group, String artifact, String version, JSONObject macro, String warp10Dir) throws IOException {
     File dest = filePath(warp10Dir, "lib", macro.getString("path"));
     // Create macro dir
@@ -280,15 +188,6 @@ public class Helper {
     FileUtils.write(dest, macroContent, StandardCharsets.UTF_8);
   }
 
-  /**
-   * Gets file as string.
-   *
-   * @param fileName the file name
-   * @param clazz    the clazz
-   * @return the file as string
-   * @throws IOException              the io exception
-   * @throws IllegalArgumentException the illegal argument exception
-   */
   public static String getFileAsString(final String fileName, Class<?> clazz) throws IOException, IllegalArgumentException {
     InputStream is = Helper.getFileAsIOStream(fileName, clazz);
     StringBuilder sb = new StringBuilder();
@@ -303,13 +202,6 @@ public class Helper {
     return sb.toString();
   }
 
-  /**
-   * Gets file as io stream.
-   *
-   * @param fileName the file name
-   * @param clazz    the clazz
-   * @return the file as io stream
-   */
   public static InputStream getFileAsIOStream(final String fileName, Class<?> clazz) {
     InputStream ioStream = clazz.getClassLoader().getResourceAsStream(fileName);
     if (ioStream == null) {
@@ -318,12 +210,6 @@ public class Helper {
     return ioStream;
   }
 
-  /**
-   * Gets params map.
-   *
-   * @param data the data
-   * @return the params map
-   */
   public static Map<String, String> getParamsMap(String... data) {
     Map<String, String> result = new HashMap<>();
 
@@ -351,15 +237,6 @@ public class Helper {
   }
 
 
-  /**
-   * Sign artefact.
-   *
-   * @param f        the f
-   * @param gpgKeyId the gpg key id
-   * @param gpgArg   the gpg arg
-   * @throws IOException          the io exception
-   * @throws InterruptedException the interrupted exception
-   */
   public static void signArtefact(File f, String gpgKeyId, String gpgArg) throws IOException, InterruptedException {
     Logger.messageInfo("Signing artifact");
     List<String> gpgArgs = new ArrayList<>();
@@ -375,7 +252,7 @@ public class Helper {
     }
     gpgArgs.add(f.getCanonicalPath());
     gpgArgs = gpgArgs.stream().map(String::trim).collect(Collectors.toList());
-    Helper.execCmd(gpgArgs);
+    Helper.execCmd(null, gpgArgs);
     FileUtils.delete(f);
     Logger.messageSusccess("Artifact signed");
   }
