@@ -107,7 +107,7 @@ abstract public class AbstractTests {
       .withProjectDir(testProjectDir)
       .withTestKitDir(testProjectDir)
       .forwardOutput()
-      .withArguments(task)
+      .withArguments(task, "--stacktrace")
       .build();
   }
 

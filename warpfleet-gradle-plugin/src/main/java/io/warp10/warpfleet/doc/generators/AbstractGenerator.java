@@ -116,10 +116,14 @@ public abstract class AbstractGenerator {
 
         } else {
           String[] it = ((String) item).split(":");
+          JSONObject params = doc.optJSONObject("params");
+          if(null == params) {
+            params = new JSONObject();
+          }
           JSONObject sigDesc = new JSONObject()
             .put("type", it[1])
             .put("name", it[0])
-            .put("desc", doc.getJSONObject("params").getString(it[0]));
+            .put("desc", params.optString(it[0], ""));
           input.put(it[0], sigDesc);
           signature.getJSONArray("in")
             .put(new JSONObject()
@@ -135,10 +139,14 @@ public abstract class AbstractGenerator {
           JSONArray sigItems = new JSONArray();
           ((JSONArray) item).forEach(s -> {
             String[] it = ((String) s).split(":");
+            JSONObject params = doc.optJSONObject("params");
+            if(null == params) {
+              params = new JSONObject();
+            }
             JSONObject sigDesc = new JSONObject()
               .put("type", it[1])
               .put("name", it[0])
-              .put("desc", doc.getJSONObject("params").getString(it[0]));
+                .put("desc", params.optString(it[0], ""));
             sigItems.put(sigDesc);
             input.put(it[0], sigDesc);
           });

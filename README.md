@@ -30,7 +30,7 @@ buildscript{
       mavenCentral()
       mavenLocal() 
       dependencies{
-        classpath 'io.warp10:warpfleet-gradle-plugin:0.0.3k'
+        classpath 'io.warp10:warpfleet-gradle-plugin:0.0.3'
       }
   }  
 }
